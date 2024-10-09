@@ -4,19 +4,27 @@ import ChatInput from "@/components/chat-input";
 import { api } from "@/convex/_generated/api";
 import { useAppState } from "@/hooks/useAppState";
 import usePushNotifications from "@/hooks/usePushNotifications";
-import { useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { Stack } from "expo-router";
-import React from "react";
+import React, { useEffect } from "react";
 import { ActivityIndicator, FlatList, View } from "react-native";
 
 export default function Index() {
   useAppState();
-  usePushNotifications();
+  const { expoPushToken, permissionGranted } = usePushNotifications();
 
   const messages = useQuery(api.message.get_mobile);
+  const setExpoTokenMutation = useMutation(api.expoToken.set);
   const isSohanaTyping = useQuery(api.typing.get)?.find(
     (user) => user.username === "Sohana"
   )?.typing;
+
+  useEffect(() => {
+    if (expoPushToken && permissionGranted) {
+      console.log(expoPushToken);
+      setExpoTokenMutation({ token: expoPushToken });
+    }
+  }, [expoPushToken, permissionGranted]);
 
   return (
     <View className="flex-1 bg-white">
