@@ -1,0 +1,13 @@
+{
+  "build": {
+    "preview": {
+      "channel": "preview",
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_CONVEX_URL": "https://exciting-marlin-640.convex.cloud"
+      }
+    }
+  }
+}
