@@ -71,18 +71,18 @@ export default function ChatInput() {
     useChat.setState({ reply_message: "", message_for_update: "" });
 
     // Send or update the message mutation
-    {
-      message_for_update
-        ? await updateMessageMutation({
-            _id: message_for_update_id,
-            text: tempMessage,
-          })
-        : await sendMessage({
-            text: tempMessage,
-            format: "text",
-            username: "Siam",
-            replyingMessage: tempReplyMessage,
-          });
+    if (message_for_update) {
+      await updateMessageMutation({
+        _id: message_for_update_id,
+        text: tempMessage.trim(),
+      });
+    } else {
+      await sendMessage({
+        text: tempMessage.trim(),
+        format: "text",
+        username: "Siam",
+        replyingMessage: tempReplyMessage,
+      });
     }
   };
 
@@ -97,22 +97,16 @@ export default function ChatInput() {
   useEffect(() => {
     if (reply_message && textInputRef.current) {
       textInputRef.current.focus();
-      return;
-    }
-
-    if (message_for_update && textInputRef.current) {
+    } else if (message_for_update && textInputRef.current) {
       setTypedMessage(message_for_update);
       textInputRef.current.focus();
-      return;
-    }
-
-    if (!message_for_update.length) {
+    } else {
       setTypedMessage("");
     }
   }, [reply_message, message_for_update]);
 
   return (
-    <View className="p-2 py-2">
+    <View className="p-2 py-2 ">
       {!!(reply_message.length || message_for_update.length) && (
         <ReplyOrUpdateIndicator />
       )}
@@ -120,14 +114,19 @@ export default function ChatInput() {
         <TextInput
           ref={textInputRef}
           placeholder="Message"
-          className="font-outfit_regular border rounded-full border-gray-300 p-2.5 px-4 flex-1"
+          className="font-outfit_regular border rounded-[2rem] border-gray-300 p-2.5 px-4 flex-1 bg-white"
           value={typedMessage}
           onChangeText={setTypedMessage}
           onSubmitEditing={onSendMessage}
+          multiline={true} // Enable multiple lines
+          style={{
+            maxHeight: 100, // Minimum height for the input
+            textAlignVertical: "center", // Align text at the top
+          }}
         />
         <TouchableOpacity onPress={onSendMessage}>
-          <View className="bg-gray-200 rounded-full items-center justify-center size-14">
-            <Feather name="send" size={16} color="#121212" />
+          <View className="bg-gray-100 rounded-full items-center justify-center size-14">
+            <Feather name="send" size={16} color="#1e1e1e" />
           </View>
         </TouchableOpacity>
       </View>
@@ -142,10 +141,10 @@ const ReplyOrUpdateIndicator = () => {
   };
 
   return (
-    <View className="flex-row items-center bg-black/5 p-2 rounded-md mb-2">
+    <View className="flex-row items-center border border-b-0 border-gray-200 rounded-3xl p-2.5 pb-4 pr-4 -mb-2 -z-50">
       <Entypo
         name={reply_message.length ? "reply" : "pencil"}
-        size={24}
+        size={16}
         color="gray"
       />
       <View className="flex-1 ml-2">

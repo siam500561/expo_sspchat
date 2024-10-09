@@ -2,7 +2,7 @@
   "expo": {
     "name": "SspChat",
     "slug": "SspChat",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "sspchat",
@@ -20,7 +20,8 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.siam500561.SspChat"
+      "package": "com.siam500561.SspChat",
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "bundler": "metro",
@@ -33,6 +34,14 @@
     },
     "runtimeVersion": {
       "policy": "appVersion"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "107c186c-ec7c-4ea0-a44c-edd91a17a4b1"
+      }
+    },
+    "updates": {
+      "url": "https://u.expo.dev/107c186c-ec7c-4ea0-a44c-edd91a17a4b1"
     }
   }
 }

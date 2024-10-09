@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "447481041542",
+    "project_id": "fcmv1-bb84f",
+    "storage_bucket": "fcmv1-bb84f.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:447481041542:android:1a23bdcc4590b8ee3cf707",
+        "android_client_info": {
+          "package_name": "com.siam500561.SspChat"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA1Rp13f3RdZrLhJefCPpMYEfT4a30X-Ns"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

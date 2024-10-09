@@ -3,13 +3,19 @@ import ChatHeader from "@/components/chat-header";
 import ChatInput from "@/components/chat-input";
 import { api } from "@/convex/_generated/api";
 import { useAppState } from "@/hooks/useAppState";
+import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { useQuery } from "convex/react";
 import { Stack } from "expo-router";
-import React from "react";
+import React, { useEffect } from "react";
 import { ActivityIndicator, FlatList, View } from "react-native";
 
 export default function Index() {
   useAppState();
+  const { expoPushToken } = usePushNotifications();
+
+  useEffect(() => {
+    console.log(expoPushToken);
+  }, [expoPushToken]);
 
   const messages = useQuery(api.message.get_mobile);
   const isSohanaTyping = useQuery(api.typing.get)?.find(
@@ -26,7 +32,7 @@ export default function Index() {
 
       <ChatHeader />
 
-      <View className="flex-1 ">
+      <View className="flex-1">
         {messages === undefined ? (
           <View className="flex-1 justify-center items-center">
             <ActivityIndicator color="black" size={"large"} />
@@ -43,6 +49,7 @@ export default function Index() {
             initialNumToRender={10}
             maxToRenderPerBatch={5}
             windowSize={5}
+            keyboardShouldPersistTaps="handled"
             getItemLayout={(_, index) => ({
               length: 60,
               offset: 60 * index,
