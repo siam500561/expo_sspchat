@@ -18,4 +18,7 @@ export default defineSchema({
     typing: v.boolean(),
     username: v.string(),
   }),
+  expoToken: defineTable({
+    token: v.string(),
+  }),
 });

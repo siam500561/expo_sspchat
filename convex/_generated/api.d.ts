@@ -15,6 +15,7 @@ import type {
   FilterApi,
   FunctionReference,
 } from "convex/server";
+import type * as expoToken from "../expoToken.js";
 import type * as message from "../message.js";
 import type * as online from "../online.js";
 import type * as typing from "../typing.js";
@@ -28,6 +29,7 @@ import type * as typing from "../typing.js";
  * ```
  */
 declare const fullApi: ApiFromModules<{
+  expoToken: typeof expoToken;
   message: typeof message;
   online: typeof online;
   typing: typeof typing;
