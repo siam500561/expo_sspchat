@@ -221,18 +221,18 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 0,
   },
   bubble: {
-    borderRadius: 24,
-    padding: 16,
+    borderRadius: 20,
+    padding: 14,
     marginVertical: 1.5,
     marginHorizontal: 8,
   },
   bubbleMe: {
     backgroundColor: "#3b82f6",
-    borderBottomRightRadius: 0,
+    borderBottomRightRadius: 4,
   },
   bubbleOther: {
     backgroundColor: "#f3f4f6",
-    borderTopLeftRadius: 0,
+    borderBottomLeftRadius: 4,
   },
   replyContainer: {
     borderLeftWidth: 2,

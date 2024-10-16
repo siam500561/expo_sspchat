@@ -8,7 +8,6 @@ export default function ChatHeader() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Chats</Text>
       <Text
         style={[
           styles.statusText,
@@ -23,19 +22,15 @@ export default function ChatHeader() {
 
 const styles = StyleSheet.create({
   container: {
-    paddingVertical: 12,
+    paddingVertical: 9,
     paddingHorizontal: 24,
     marginTop: 32,
     alignItems: "center",
   },
-  title: {
-    fontFamily: "Outfit_500Medium",
-    fontSize: 24,
-  },
   statusText: {
     fontSize: 12,
     fontFamily: "Outfit_400Regular",
-    marginTop: 4,
+    marginTop: 3,
   },
   onlineText: {
     color: "#22c55e", // green-500
