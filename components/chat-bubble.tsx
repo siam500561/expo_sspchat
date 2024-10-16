@@ -127,7 +127,7 @@ const ChatBubble = (props: Props) => {
         resizeMode="contain"
         onLoad={handleImageLoad}
         className={cn(
-          "rounded-3xl",
+          "rounded-3xl mx-2",
           isMe ? "rounded-br-none self-end" : "rounded-tl-none self-start"
         )}
       />
