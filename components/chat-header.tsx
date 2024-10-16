@@ -1,23 +1,46 @@
 import { api } from "@/convex/_generated/api";
-import { cn } from "@/lib/utils";
 import { useQuery } from "convex/react";
 import React from "react";
-import { Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 
 export default function ChatHeader() {
   const isSohanaOnline = useQuery(api.online.get)?.sohana?.online;
 
   return (
-    <View className="py-3 px-6 mt-8 items-center">
-      <Text className={"font-outfit_medium text-2xl"}>Chats</Text>
+    <View style={styles.container}>
+      <Text style={styles.title}>Chats</Text>
       <Text
-        className={cn(
-          "text-xs font-outfit_regular mt-1",
-          isSohanaOnline ? "text-green-500" : "text-red-500"
-        )}
+        style={[
+          styles.statusText,
+          isSohanaOnline ? styles.onlineText : styles.offlineText,
+        ]}
       >
         Sohana is {isSohanaOnline ? "online" : "offline"}
       </Text>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    marginTop: 32,
+    alignItems: "center",
+  },
+  title: {
+    fontFamily: "Outfit_500Medium",
+    fontSize: 24,
+  },
+  statusText: {
+    fontSize: 12,
+    fontFamily: "Outfit_400Regular",
+    marginTop: 4,
+  },
+  onlineText: {
+    color: "#22c55e", // green-500
+  },
+  offlineText: {
+    color: "#ef4444", // red-500
+  },
+});

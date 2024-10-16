@@ -1,7 +1,6 @@
 import { api } from "@/convex/_generated/api";
 import { Doc, Id } from "@/convex/_generated/dataModel";
 import { wp } from "@/lib/dimensions";
-import { cn } from "@/lib/utils";
 import { useChat } from "@/store/useChat";
 import { useMutation } from "convex/react";
 import { format } from "date-fns";
@@ -13,6 +12,7 @@ import {
   ImageLoadEventData,
   NativeSyntheticEvent,
   PanResponder,
+  StyleSheet,
   Text,
   TouchableOpacity,
   View,
@@ -123,13 +123,13 @@ const ChatBubble = (props: Props) => {
     return (
       <Image
         source={{ uri: message.imageUrl }}
-        style={{ width: "75%", aspectRatio }}
+        style={[
+          styles.image,
+          { aspectRatio },
+          isMe ? styles.imageMe : styles.imageOther,
+        ]}
         resizeMode="contain"
         onLoad={handleImageLoad}
-        className={cn(
-          "rounded-3xl mx-2",
-          isMe ? "rounded-br-none self-end" : "rounded-tl-none self-start"
-        )}
       />
     );
   }
@@ -150,26 +150,24 @@ const ChatBubble = (props: Props) => {
         activeOpacity={0.7}
       >
         <View
-          className={cn(
-            "rounded-3xl p-4 my-[0.15rem] mx-2",
-            isMe ? "bg-blue-500 rounded-br-none" : "bg-gray-100 rounded-tl-none"
-          )}
-          style={{ maxWidth: wp(90) }}
+          style={[
+            styles.bubble,
+            isMe ? styles.bubbleMe : styles.bubbleOther,
+            { maxWidth: wp(90) },
+          ]}
         >
           {message.replyingMessage && !isTyping && (
             <View
-              className={cn(
-                "border-l-2 rounded-3xl p-3 mb-2",
-                isMe
-                  ? "border-white/90 bg-white/5"
-                  : "border-gray-700 bg-black/5"
-              )}
+              style={[
+                styles.replyContainer,
+                isMe ? styles.replyContainerMe : styles.replyContainerOther,
+              ]}
             >
               <Text
-                className={cn(
-                  "font-outfit_regular text-xs",
-                  isMe ? "text-white/80" : "text-gray-500"
-                )}
+                style={[
+                  styles.replyText,
+                  isMe ? styles.replyTextMe : styles.replyTextOther,
+                ]}
               >
                 {message.replyingMessage}
               </Text>
@@ -177,43 +175,28 @@ const ChatBubble = (props: Props) => {
           )}
 
           {isTyping ? (
-            <View className="flex-row">
-              <View
-                className={cn(
-                  "h-2 w-2 rounded-full bg-gray-400 mr-1 animate-pulse",
-                  isMe && "bg-white"
-                )}
-              />
-              <View
-                className={cn(
-                  "h-2 w-2 rounded-full bg-gray-400 mr-1 animate-pulse",
-                  isMe && "bg-white"
-                )}
-              />
-              <View
-                className={cn(
-                  "h-2 w-2 rounded-full bg-gray-400 mr-1 animate-pulse",
-                  isMe && "bg-white"
-                )}
-              />
+            <View style={styles.typingContainer}>
+              <View style={[styles.typingDot, isMe && styles.typingDotMe]} />
+              <View style={[styles.typingDot, isMe && styles.typingDotMe]} />
+              <View style={[styles.typingDot, isMe && styles.typingDotMe]} />
             </View>
           ) : (
             <Text
-              className={cn(
-                "text-lg font-outfit_regular",
-                isMe ? "text-white" : "text-gray-800"
-              )}
+              style={[
+                styles.messageText,
+                isMe ? styles.messageTextMe : styles.messageTextOther,
+              ]}
             >
               {message.text}
             </Text>
           )}
 
           <Text
-            className={cn(
-              "font-outfit_regular text-[0.675rem] mt-2",
-              isMe ? "text-white/70 text-right" : "text-gray-800 text-left",
-              isTyping && "hidden"
-            )}
+            style={[
+              styles.timestamp,
+              isMe ? styles.timestampMe : styles.timestampOther,
+              isTyping && styles.hidden,
+            ]}
           >
             {formatDateString(message._creationTime.toString())}
           </Text>
@@ -222,5 +205,99 @@ const ChatBubble = (props: Props) => {
     </Animated.View>
   );
 };
+
+const styles = StyleSheet.create({
+  image: {
+    width: "75%",
+    margin: 8,
+    borderRadius: 24,
+  },
+  imageMe: {
+    alignSelf: "flex-end",
+    borderBottomRightRadius: 0,
+  },
+  imageOther: {
+    alignSelf: "flex-start",
+    borderTopLeftRadius: 0,
+  },
+  bubble: {
+    borderRadius: 24,
+    padding: 16,
+    marginVertical: 1.5,
+    marginHorizontal: 8,
+  },
+  bubbleMe: {
+    backgroundColor: "#3b82f6",
+    borderBottomRightRadius: 0,
+  },
+  bubbleOther: {
+    backgroundColor: "#f3f4f6",
+    borderTopLeftRadius: 0,
+  },
+  replyContainer: {
+    borderLeftWidth: 2,
+    borderRadius: 24,
+    padding: 12,
+    marginBottom: 8,
+  },
+  replyContainerMe: {
+    borderColor: "rgba(255, 255, 255, 0.9)",
+    backgroundColor: "rgba(255, 255, 255, 0.05)",
+  },
+  replyContainerOther: {
+    borderColor: "#374151",
+    backgroundColor: "rgba(0, 0, 0, 0.05)",
+  },
+  replyText: {
+    fontFamily: "Outfit_400Regular",
+    fontSize: 12,
+  },
+  replyTextMe: {
+    color: "rgba(255, 255, 255, 0.8)",
+  },
+  replyTextOther: {
+    color: "#6b7280",
+  },
+  typingContainer: {
+    flexDirection: "row",
+  },
+  typingDot: {
+    height: 8,
+    width: 8,
+    borderRadius: 4,
+    backgroundColor: "#9ca3af",
+    marginRight: 4,
+  },
+  typingDotMe: {
+    backgroundColor: "white",
+  },
+  messageText: {
+    fontSize: 16,
+    fontFamily: "Outfit_400Regular",
+    lineHeight: 24,
+  },
+  messageTextMe: {
+    color: "white",
+  },
+  messageTextOther: {
+    color: "#1f2937",
+  },
+  timestamp: {
+    fontFamily: "Outfit_400Regular",
+    fontSize: 10.8,
+    marginTop: 8,
+  },
+  timestampMe: {
+    color: "rgba(255, 255, 255, 0.7)",
+    textAlign: "right",
+  },
+  timestampOther: {
+    color: "#1f2937",
+    textAlign: "left",
+  },
+  hidden: {
+    display: "none",
+  },
+});
 
 export default ChatBubble;

@@ -8,7 +8,13 @@ import Feather from "@expo/vector-icons/Feather";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useMutation } from "convex/react";
 import React, { useEffect, useRef, useState } from "react";
-import { Text, TextInput, TouchableOpacity, View } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import uuid from "react-native-uuid";
 
 export default function ChatInput() {
@@ -106,26 +112,22 @@ export default function ChatInput() {
   }, [reply_message, message_for_update]);
 
   return (
-    <View className="p-2 py-2 ">
+    <View style={styles.container}>
       {!!(reply_message.length || message_for_update.length) && (
         <ReplyOrUpdateIndicator />
       )}
-      <View className="flex-row gap-1">
+      <View style={styles.inputContainer}>
         <TextInput
           ref={textInputRef}
           placeholder="Message"
-          className="font-outfit_regular border rounded-[2rem] border-gray-300 p-2.5 px-4 flex-1 bg-white"
+          style={styles.textInput}
           value={typedMessage}
           onChangeText={setTypedMessage}
           onSubmitEditing={onSendMessage}
-          multiline={true} // Enable multiple lines
-          style={{
-            maxHeight: 100, // Minimum height for the input
-            textAlignVertical: "center", // Align text at the top
-          }}
+          multiline={true}
         />
-        <TouchableOpacity onPress={onSendMessage}>
-          <View className="bg-gray-100 rounded-full items-center justify-center size-14">
+        <TouchableOpacity onPress={onSendMessage} style={styles.sendButton}>
+          <View style={styles.sendButtonInner}>
             <Feather name="send" size={16} color="#1e1e1e" />
           </View>
         </TouchableOpacity>
@@ -141,20 +143,17 @@ const ReplyOrUpdateIndicator = () => {
   };
 
   return (
-    <View className="flex-row items-center border border-b-0 border-gray-200 rounded-3xl p-2.5 pb-4 pr-4 -mb-2 -z-50">
+    <View style={styles.indicatorContainer}>
       <Entypo
         name={reply_message.length ? "reply" : "pencil"}
         size={16}
         color="gray"
       />
-      <View className="flex-1 ml-2">
-        <Text className="text-sm font-outfit_regular">
+      <View style={styles.indicatorTextContainer}>
+        <Text style={styles.indicatorTitle}>
           {reply_message ? "Replying to" : "Update"}:
         </Text>
-        <Text
-          numberOfLines={1}
-          className="text-xs text-gray-600 font-outfit_regular"
-        >
+        <Text numberOfLines={1} style={styles.indicatorMessage}>
           {reply_message.length ? reply_message : message_for_update}
         </Text>
       </View>
@@ -162,3 +161,64 @@ const ReplyOrUpdateIndicator = () => {
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 8,
+    paddingVertical: 8,
+  },
+  inputContainer: {
+    flexDirection: "row",
+    gap: 4,
+  },
+  textInput: {
+    fontFamily: "Outfit_400Regular",
+    borderWidth: 1,
+    borderRadius: 32,
+    borderColor: "#d1d5db",
+    padding: 10,
+    paddingHorizontal: 16,
+    flex: 1,
+    backgroundColor: "white",
+    maxHeight: 100,
+    textAlignVertical: "center",
+  },
+  sendButton: {
+    backgroundColor: "#f3f4f6",
+    borderRadius: 28,
+    alignItems: "center",
+    justifyContent: "center",
+    width: 56,
+    height: 56,
+  },
+  sendButtonInner: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  indicatorContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderBottomWidth: 0,
+    borderColor: "#e5e7eb",
+    borderRadius: 24,
+    padding: 10,
+    paddingBottom: 16,
+    paddingRight: 16,
+    marginBottom: -8,
+    zIndex: -1,
+  },
+  indicatorTextContainer: {
+    flex: 1,
+    marginLeft: 8,
+  },
+  indicatorTitle: {
+    fontSize: 14,
+    fontFamily: "Outfit_400Regular",
+  },
+  indicatorMessage: {
+    fontSize: 12,
+    color: "#4b5563",
+    fontFamily: "Outfit_400Regular",
+  },
+});

@@ -7,7 +7,7 @@ import usePushNotifications from "@/hooks/usePushNotifications";
 import { useMutation, useQuery } from "convex/react";
 import { Stack } from "expo-router";
 import React, { useEffect } from "react";
-import { ActivityIndicator, FlatList, View } from "react-native";
+import { ActivityIndicator, FlatList, StyleSheet, View } from "react-native";
 
 export default function Index() {
   useAppState();
@@ -27,7 +27,7 @@ export default function Index() {
   }, [expoPushToken, permissionGranted]);
 
   return (
-    <View className="flex-1 bg-white">
+    <View style={styles.container}>
       <Stack.Screen
         options={{
           headerShown: false,
@@ -36,10 +36,10 @@ export default function Index() {
 
       <ChatHeader />
 
-      <View className="flex-1">
+      <View style={styles.messageContainer}>
         {messages === undefined ? (
-          <View className="flex-1 justify-center items-center">
-            <ActivityIndicator color="black" size={"large"} />
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator color="black" size="large" />
           </View>
         ) : (
           <FlatList
@@ -79,3 +79,18 @@ export default function Index() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "white",
+  },
+  messageContainer: {
+    flex: 1,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+});
