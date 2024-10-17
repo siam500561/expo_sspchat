@@ -45,13 +45,29 @@ const downloadImage = async (imageUrl: string) => {
     );
 
     const downloaded = await downloadResumable.downloadAsync();
-    const asset = await MediaLibrary.createAssetAsync(downloaded!.uri);
-    await MediaLibrary.createAlbumAsync("Downloads", asset, false);
 
-    alert("Image saved to gallery!");
+    Alert.alert("Download Photo", "Do you want to download this photo?", [
+      {
+        text: "Cancel",
+        style: "cancel",
+      },
+      {
+        text: "Download",
+        onPress: async () => {
+          try {
+            const asset = await MediaLibrary.createAssetAsync(downloaded!.uri);
+            await MediaLibrary.createAlbumAsync("Downloads", asset, false);
+            alert("Image saved to gallery!");
+          } catch (error) {
+            console.error("Error saving image:", error);
+            alert("Failed to save image.");
+          }
+        },
+      },
+    ]);
   } catch (error) {
     console.error("Error downloading image:", error);
-    alert("Failed to save image.");
+    alert("Failed to download image.");
   }
 };
 
@@ -129,7 +145,7 @@ const ChatBubble = (props: Props) => {
     setAspectRatio(width / height);
   };
 
-  const handleLongPress = () => {
+  const handleDelete = () => {
     if (!isMe) return;
     Alert.alert(
       "Delete Message",
@@ -156,16 +172,24 @@ const ChatBubble = (props: Props) => {
     return (
       <TouchableOpacity
         onLongPress={() => {
-          Alert.alert("Download Image", "Do you want to download this image?", [
-            {
-              text: "Cancel",
-              style: "cancel",
-            },
-            {
-              text: "Download",
-              onPress: () => downloadImage(message.imageUrl!),
-            },
-          ]);
+          Alert.alert(
+            isMe ? "Delete Photo" : "Download Photo",
+            isMe
+              ? "Do you want to delete this photo?"
+              : "Do you want to download this photo?",
+            [
+              {
+                text: "Cancel",
+                style: "cancel",
+              },
+              {
+                text: isMe ? "Delete" : "Download",
+                onPress: () => {
+                  isMe ? handleDelete() : downloadImage(message.imageUrl!);
+                },
+              },
+            ]
+          );
         }}
         delayLongPress={500}
       >
@@ -194,7 +218,7 @@ const ChatBubble = (props: Props) => {
       ]}
     >
       <TouchableOpacity
-        onLongPress={handleLongPress}
+        onLongPress={handleDelete}
         delayLongPress={500}
         activeOpacity={0.7}
       >
