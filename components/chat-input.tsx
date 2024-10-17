@@ -1,74 +1,37 @@
 import { SIAM_TYPING_ID } from "@/constants/ids";
 import { api } from "@/convex/_generated/api";
-import { Doc, Id } from "@/convex/_generated/dataModel";
 import { useStatus } from "@/hooks/useStatus";
 import { useChat } from "@/store/useChat";
 import Entypo from "@expo/vector-icons/Entypo";
 import Feather from "@expo/vector-icons/Feather";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useMutation } from "convex/react";
+import * as Haptics from "expo-haptics";
 import React, { useEffect, useRef, useState } from "react";
 import {
+  ActivityIndicator,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
-import uuid from "react-native-uuid";
 
 export default function ChatInput() {
   const [typedMessage, setTypedMessage] = useState("");
+  const [isSending, setIsSending] = useState(false);
   const { reply_message, message_for_update, message_for_update_id } =
     useChat();
 
   const textInputRef = useRef<TextInput>(null);
   const { handleTyping } = useStatus();
 
-  const sendMessage = useMutation(api.message.send).withOptimisticUpdate(
-    (localStore, args) => {
-      const existingMessages = localStore.getQuery(api.message.get_mobile);
-
-      if (existingMessages !== undefined && args.format === "text") {
-        const now = Date.now();
-
-        const newMessage: Doc<"messages"> = {
-          _id: uuid.v4() as Id<"messages">,
-          _creationTime: now,
-          format: args.format,
-          text: args.text,
-          username: args.username,
-          replyingMessage: args.replyingMessage,
-        };
-
-        // Add new message optimistically
-        localStore.setQuery(api.message.get_mobile, {}, [
-          newMessage,
-          ...existingMessages,
-        ]);
-      }
-    }
-  );
-  const updateMessageMutation = useMutation(
-    api.message.update
-  ).withOptimisticUpdate((localStore, args) => {
-    const existingMessages = localStore.getQuery(api.message.get_mobile);
-    if (existingMessages !== undefined) {
-      localStore.setQuery(
-        api.message.get_mobile,
-        {},
-        existingMessages.map((message) => {
-          if (message._id === args._id) {
-            return { ...message, text: args.text };
-          }
-          return message;
-        })
-      );
-    }
-  });
+  const sendMessage = useMutation(api.message.send);
+  const updateMessageMutation = useMutation(api.message.update);
 
   const onSendMessage = async () => {
-    if (typedMessage.trim().length === 0) return; // Avoid sending empty messages
+    if (typedMessage.trim().length === 0 || isSending) return; // Avoid sending empty messages or if already sending
+    setIsSending(true); // Start sending
 
     // Clear input immediately after pressing send
     const tempMessage = typedMessage;
@@ -76,19 +39,27 @@ export default function ChatInput() {
     setTypedMessage("");
     useChat.setState({ reply_message: "", message_for_update: "" });
 
-    // Send or update the message mutation
-    if (message_for_update) {
-      await updateMessageMutation({
-        _id: message_for_update_id,
-        text: tempMessage.trim(),
-      });
-    } else {
-      await sendMessage({
-        text: tempMessage.trim(),
-        format: "text",
-        username: "Siam",
-        replyingMessage: tempReplyMessage,
-      });
+    try {
+      // Send or update the message mutation
+      if (message_for_update) {
+        await updateMessageMutation({
+          _id: message_for_update_id,
+          text: tempMessage.trim(),
+        });
+      } else {
+        await sendMessage({
+          text: tempMessage.trim(),
+          format: "text",
+          username: "Siam",
+          replyingMessage: tempReplyMessage,
+        });
+      }
+    } catch (error) {
+      console.error("Failed to send message:", error);
+      // Optionally, you could show an error message to the user here
+    } finally {
+      setIsSending(false); // End sending
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
   };
 
@@ -126,9 +97,17 @@ export default function ChatInput() {
           onSubmitEditing={onSendMessage}
           multiline={true}
         />
-        <TouchableOpacity onPress={onSendMessage} style={styles.sendButton}>
+        <TouchableOpacity
+          onPress={onSendMessage}
+          style={[styles.sendButton, isSending && styles.sendButtonDisabled]}
+          disabled={isSending}
+        >
           <View style={styles.sendButtonInner}>
-            <Feather name="send" size={16} color="#1e1e1e" />
+            {isSending ? (
+              <ActivityIndicator size="small" color="#1e1e1e" />
+            ) : (
+              <Feather name="send" size={16} color="#1e1e1e" />
+            )}
           </View>
         </TouchableOpacity>
       </View>
@@ -163,6 +142,9 @@ const ReplyOrUpdateIndicator = () => {
 };
 
 const styles = StyleSheet.create({
+  sendButtonDisabled: {
+    opacity: 0.5,
+  },
   container: {
     padding: 8,
     paddingVertical: 8,

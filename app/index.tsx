@@ -4,7 +4,7 @@ import ChatInput from "@/components/chat-input";
 import { api } from "@/convex/_generated/api";
 import { useAppState } from "@/hooks/useAppState";
 import usePushNotifications from "@/hooks/usePushNotifications";
-import { useQuery } from "convex/react";
+import { usePaginatedQuery, useQuery } from "convex/react";
 import { Stack } from "expo-router";
 import React from "react";
 import { ActivityIndicator, FlatList, StyleSheet, View } from "react-native";
@@ -13,10 +13,33 @@ export default function Index() {
   useAppState();
   usePushNotifications();
 
-  const messages = useQuery(api.message.get_mobile);
+  const { results, loadMore, status } = usePaginatedQuery(
+    api.message.get,
+    {},
+    {
+      initialNumItems: 50,
+    }
+  );
   const isSohanaTyping = useQuery(api.typing.get)?.find(
     (user) => user.username === "Sohana"
   )?.typing;
+
+  const renderLoader = () => {
+    if (status === "LoadingMore") {
+      return (
+        <View style={styles.loaderContainer}>
+          <ActivityIndicator color="black" size="small" />
+        </View>
+      );
+    }
+    return null;
+  };
+
+  const handleLoadMore = () => {
+    if (status === "CanLoadMore") {
+      loadMore(20);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -29,34 +52,28 @@ export default function Index() {
       <ChatHeader />
 
       <View style={styles.messageContainer}>
-        {messages === undefined ? (
+        {status === "LoadingFirstPage" ? (
           <View style={styles.loadingContainer}>
             <ActivityIndicator color="black" size="large" />
           </View>
         ) : (
           <FlatList
-            data={messages}
+            data={results}
             keyExtractor={(item) => item._id}
             renderItem={({ item }) => (
               <ChatBubble message={item} isMe={item.username === "Siam"} />
             )}
             showsVerticalScrollIndicator={false}
             inverted
-            initialNumToRender={10}
-            maxToRenderPerBatch={5}
-            windowSize={5}
             keyboardShouldPersistTaps="handled"
-            getItemLayout={(_, index) => ({
-              length: 60,
-              offset: 60 * index,
-              index,
-            })}
-            scrollEventThrottle={16}
+            onEndReached={handleLoadMore}
+            onEndReachedThreshold={0.1}
+            ListFooterComponent={renderLoader}
             ListHeaderComponent={() => (
               <View>
                 {isSohanaTyping && (
                   <ChatBubble
-                    message={messages[0]}
+                    message={results[0]}
                     isTyping={isSohanaTyping}
                     isMe={false}
                   />
@@ -83,6 +100,10 @@ const styles = StyleSheet.create({
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
+    alignItems: "center",
+  },
+  loaderContainer: {
+    paddingVertical: 20,
     alignItems: "center",
   },
 });

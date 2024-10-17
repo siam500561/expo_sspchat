@@ -4,6 +4,9 @@ import { wp } from "@/lib/dimensions";
 import { useChat } from "@/store/useChat";
 import { useMutation } from "convex/react";
 import { format } from "date-fns";
+import * as FileSystem from "expo-file-system";
+import * as Haptics from "expo-haptics";
+import * as MediaLibrary from "expo-media-library";
 import React, { useRef, useState } from "react";
 import {
   Alert,
@@ -22,6 +25,34 @@ type Props = {
   message: Doc<"messages">;
   isTyping?: boolean;
   isMe: boolean;
+};
+
+const downloadImage = async (imageUrl: string) => {
+  if (!imageUrl) return;
+
+  try {
+    const { status } = await MediaLibrary.requestPermissionsAsync();
+    if (status !== "granted") {
+      alert("Sorry, we need media library permissions to download the image.");
+      return;
+    }
+
+    const fileUri = FileSystem.documentDirectory + "downloaded_image.jpg";
+    const downloadResumable = FileSystem.createDownloadResumable(
+      imageUrl,
+      fileUri,
+      {}
+    );
+
+    const downloaded = await downloadResumable.downloadAsync();
+    const asset = await MediaLibrary.createAssetAsync(downloaded!.uri);
+    await MediaLibrary.createAlbumAsync("Downloads", asset, false);
+
+    alert("Image saved to gallery!");
+  } catch (error) {
+    console.error("Error downloading image:", error);
+    alert("Failed to save image.");
+  }
 };
 
 function formatDateString(dateString: string): string {
@@ -65,6 +96,7 @@ const ChatBubble = (props: Props) => {
     },
     onPanResponderRelease: (_, gestureState) => {
       if (gestureState.dx >= rightSwipeThreshold) {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
         useChat.setState({
           reply_message: message.text,
           message_for_update: "",
@@ -75,6 +107,7 @@ const ChatBubble = (props: Props) => {
         !message.imageUrl &&
         gestureState.dx <= leftSwipeThreshold
       ) {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
         // Handle left swipe action for user's messages (except images)
         useChat.setState({
           reply_message: "",
@@ -121,16 +154,32 @@ const ChatBubble = (props: Props) => {
 
   if (message.imageUrl) {
     return (
-      <Image
-        source={{ uri: message.imageUrl }}
-        style={[
-          styles.image,
-          { aspectRatio },
-          isMe ? styles.imageMe : styles.imageOther,
-        ]}
-        resizeMode="contain"
-        onLoad={handleImageLoad}
-      />
+      <TouchableOpacity
+        onLongPress={() => {
+          Alert.alert("Download Image", "Do you want to download this image?", [
+            {
+              text: "Cancel",
+              style: "cancel",
+            },
+            {
+              text: "Download",
+              onPress: () => downloadImage(message.imageUrl!),
+            },
+          ]);
+        }}
+        delayLongPress={500}
+      >
+        <Image
+          source={{ uri: message.imageUrl }}
+          style={[
+            styles.image,
+            { aspectRatio },
+            isMe ? styles.imageMe : styles.imageOther,
+          ]}
+          resizeMode="contain"
+          onLoad={handleImageLoad}
+        />
+      </TouchableOpacity>
     );
   }
 
@@ -209,16 +258,17 @@ const ChatBubble = (props: Props) => {
 const styles = StyleSheet.create({
   image: {
     width: "75%",
-    margin: 8,
+    marginVertical: 1.5,
+    marginHorizontal: 8,
     borderRadius: 24,
   },
   imageMe: {
     alignSelf: "flex-end",
-    borderBottomRightRadius: 0,
+    borderBottomRightRadius: 4,
   },
   imageOther: {
     alignSelf: "flex-start",
-    borderTopLeftRadius: 0,
+    borderBottomLeftRadius: 4,
   },
   bubble: {
     borderRadius: 20,
