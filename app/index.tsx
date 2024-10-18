@@ -37,7 +37,7 @@ export default function Index() {
 
   const handleLoadMore = () => {
     if (status === "CanLoadMore") {
-      loadMore(20);
+      loadMore(40);
     }
   };
 

@@ -18,6 +18,7 @@ import type {
 import type * as expoToken from "../expoToken.js";
 import type * as message from "../message.js";
 import type * as online from "../online.js";
+import type * as sohana_typing from "../sohana_typing.js";
 import type * as typing from "../typing.js";
 
 /**
@@ -32,6 +33,7 @@ declare const fullApi: ApiFromModules<{
   expoToken: typeof expoToken;
   message: typeof message;
   online: typeof online;
+  sohana_typing: typeof sohana_typing;
   typing: typeof typing;
 }>;
 export declare const api: FilterApi<

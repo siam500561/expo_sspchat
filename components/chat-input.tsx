@@ -5,7 +5,7 @@ import { useChat } from "@/store/useChat";
 import Entypo from "@expo/vector-icons/Entypo";
 import Feather from "@expo/vector-icons/Feather";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { useMutation } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import * as Haptics from "expo-haptics";
 import React, { useEffect, useRef, useState } from "react";
 import {
@@ -26,21 +26,21 @@ export default function ChatInput() {
   const textInputRef = useRef<TextInput>(null);
   const { handleTyping } = useStatus();
 
+  const sohana_typing = useQuery(api.sohana_typing.get);
+
   const sendMessage = useMutation(api.message.send);
   const updateMessageMutation = useMutation(api.message.update);
 
   const onSendMessage = async () => {
-    if (typedMessage.trim().length === 0 || isSending) return; // Avoid sending empty messages or if already sending
-    setIsSending(true); // Start sending
+    if (typedMessage.trim().length === 0 || isSending) return;
+    setIsSending(true);
 
-    // Clear input immediately after pressing send
     const tempMessage = typedMessage;
     const tempReplyMessage = reply_message;
     setTypedMessage("");
     useChat.setState({ reply_message: "", message_for_update: "" });
 
     try {
-      // Send or update the message mutation
       if (message_for_update) {
         await updateMessageMutation({
           _id: message_for_update_id,
@@ -56,9 +56,8 @@ export default function ChatInput() {
       }
     } catch (error) {
       console.error("Failed to send message:", error);
-      // Optionally, you could show an error message to the user here
     } finally {
-      setIsSending(false); // End sending
+      setIsSending(false);
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
   };
@@ -77,15 +76,34 @@ export default function ChatInput() {
     } else if (message_for_update && textInputRef.current) {
       setTypedMessage(message_for_update);
       textInputRef.current.focus();
-    } else {
-      setTypedMessage("");
     }
   }, [reply_message, message_for_update]);
 
+  const handleClose = (isReply: boolean) => {
+    if (!isReply) {
+      // If closing an update, clear the typed message
+      setTypedMessage("");
+    }
+    useChat.setState({ reply_message: "", message_for_update: "" });
+  };
+
   return (
     <View style={styles.container}>
+      {!!sohana_typing?.text.length && (
+        <Text
+          style={{
+            fontFamily: "Outfit_400Regular",
+            fontSize: 11,
+            marginBottom: 6,
+            textAlign: "center",
+            color: "gray",
+          }}
+        >
+          {sohana_typing?.text}
+        </Text>
+      )}
       {!!(reply_message.length || message_for_update.length) && (
-        <ReplyOrUpdateIndicator />
+        <ReplyOrUpdateIndicator onClose={handleClose} />
       )}
       <View style={styles.inputContainer}>
         <TextInput
@@ -115,28 +133,31 @@ export default function ChatInput() {
   );
 }
 
-const ReplyOrUpdateIndicator = () => {
+const ReplyOrUpdateIndicator = ({
+  onClose,
+}: {
+  onClose: (isReply: boolean) => void;
+}) => {
   const { reply_message, message_for_update } = useChat();
-  const onClose = () => {
-    useChat.setState({ reply_message: "", message_for_update: "" });
-  };
+  const isReply = !!reply_message.length;
 
   return (
     <View style={styles.indicatorContainer}>
-      <Entypo
-        name={reply_message.length ? "reply" : "pencil"}
-        size={16}
-        color="gray"
-      />
+      <Entypo name={isReply ? "reply" : "pencil"} size={16} color="gray" />
       <View style={styles.indicatorTextContainer}>
         <Text style={styles.indicatorTitle}>
-          {reply_message ? "Replying to" : "Update"}:
+          {isReply ? "Replying to" : "Update"}:
         </Text>
         <Text numberOfLines={1} style={styles.indicatorMessage}>
-          {reply_message.length ? reply_message : message_for_update}
+          {isReply ? reply_message : message_for_update}
         </Text>
       </View>
-      <Ionicons name="close" size={20} color="gray" onPress={onClose} />
+      <Ionicons
+        name="close"
+        size={20}
+        color="gray"
+        onPress={() => onClose(isReply)}
+      />
     </View>
   );
 };

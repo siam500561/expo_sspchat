@@ -21,4 +21,7 @@ export default defineSchema({
   expoToken: defineTable({
     token: v.string(),
   }),
+  sohana_typing: defineTable({
+    text: v.string(),
+  }),
 });

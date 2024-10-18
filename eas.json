@@ -9,6 +9,14 @@
         "EXPO_PUBLIC_CONVEX_URL": "https://exciting-marlin-640.convex.cloud"
       }
     },
+    "preview-bundle": {
+      "android": {
+        "buildType": "app-bundle"
+      },
+      "env": {
+        "EXPO_PUBLIC_CONVEX_URL": "https://exciting-marlin-640.convex.cloud"
+      }
+    },
     "development": {
       "developmentClient": true,
       "distribution": "internal",
