@@ -11,8 +11,10 @@ import React, { useRef, useState } from "react";
 import {
   Alert,
   Animated,
+  Dimensions,
   Image,
   ImageLoadEventData,
+  Modal,
   NativeSyntheticEvent,
   PanResponder,
   StyleSheet,
@@ -96,6 +98,7 @@ const ChatBubble = (props: Props) => {
       }
     }
   );
+  const [isImageModalVisible, setIsImageModalVisible] = useState(false);
 
   const panResponder = PanResponder.create({
     onStartShouldSetPanResponder: () => true,
@@ -103,10 +106,7 @@ const ChatBubble = (props: Props) => {
       return Math.abs(gestureState.dx) > 10 && Math.abs(gestureState.dy) < 10;
     },
     onPanResponderMove: (_, gestureState) => {
-      if (
-        gestureState.dx > 0 ||
-        (isMe && !message.imageUrl && gestureState.dx < 0)
-      ) {
+      if (gestureState.dx > 0 || (!message.imageUrl && gestureState.dx < 0)) {
         translateX.setValue(gestureState.dx);
       }
     },
@@ -118,13 +118,8 @@ const ChatBubble = (props: Props) => {
           message_for_update: "",
           message_for_update_id: "" as any,
         });
-      } else if (
-        isMe &&
-        !message.imageUrl &&
-        gestureState.dx <= leftSwipeThreshold
-      ) {
+      } else if (!message.imageUrl && gestureState.dx <= leftSwipeThreshold) {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-        // Handle left swipe action for user's messages (except images)
         useChat.setState({
           reply_message: "",
           message_for_update: message.text,
@@ -170,40 +165,60 @@ const ChatBubble = (props: Props) => {
 
   if (message.imageUrl) {
     return (
-      <TouchableOpacity
-        onLongPress={() => {
-          Alert.alert(
-            isMe ? "Delete Photo" : "Download Photo",
-            isMe
-              ? "Do you want to delete this photo?"
-              : "Do you want to download this photo?",
-            [
-              {
-                text: "Cancel",
-                style: "cancel",
-              },
-              {
-                text: isMe ? "Delete" : "Download",
-                onPress: () => {
-                  isMe ? handleDelete() : downloadImage(message.imageUrl!);
+      <>
+        <TouchableOpacity
+          onPress={() => setIsImageModalVisible(true)}
+          onLongPress={() => {
+            Alert.alert(
+              isMe ? "Delete Photo" : "Download Photo",
+              isMe
+                ? "Do you want to delete this photo?"
+                : "Do you want to download this photo?",
+              [
+                {
+                  text: "Cancel",
+                  style: "cancel",
                 },
-              },
-            ]
-          );
-        }}
-        delayLongPress={500}
-      >
-        <Image
-          source={{ uri: message.imageUrl }}
-          style={[
-            styles.image,
-            { aspectRatio },
-            isMe ? styles.imageMe : styles.imageOther,
-          ]}
-          resizeMode="contain"
-          onLoad={handleImageLoad}
-        />
-      </TouchableOpacity>
+                {
+                  text: isMe ? "Delete" : "Download",
+                  onPress: () => {
+                    isMe ? handleDelete() : downloadImage(message.imageUrl!);
+                  },
+                },
+              ]
+            );
+          }}
+          delayLongPress={500}
+        >
+          <Image
+            source={{ uri: message.imageUrl }}
+            style={[
+              styles.image,
+              { aspectRatio },
+              isMe ? styles.imageMe : styles.imageOther,
+            ]}
+            resizeMode="contain"
+            onLoad={handleImageLoad}
+          />
+        </TouchableOpacity>
+        <Modal
+          visible={isImageModalVisible}
+          transparent={true}
+          onRequestClose={() => setIsImageModalVisible(false)}
+        >
+          <TouchableOpacity
+            style={styles.modalBackground}
+            activeOpacity={1}
+            onPress={() => setIsImageModalVisible(false)}
+          >
+            <Image
+              source={{ uri: message.imageUrl }}
+              style={styles.fullScreenImage}
+              resizeMode="contain"
+            />
+          </TouchableOpacity>
+        </Modal>
+      </>
     );
   }
 
@@ -372,6 +387,16 @@ const styles = StyleSheet.create({
   hidden: {
     display: "none",
   },
+  modalBackground: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.9)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  fullScreenImage: {
+    width: Dimensions.get("window").width,
+    height: Dimensions.get("window").height,
+  },
 });
 
-export default ChatBubble;
+export default React.memo(ChatBubble);

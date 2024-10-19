@@ -20,9 +20,8 @@ export default function Index() {
       initialNumItems: 50,
     }
   );
-  const isSohanaTyping = useQuery(api.typing.get)?.find(
-    (user) => user.username === "Sohana"
-  )?.typing;
+
+  const sohana_typing = useQuery(api.sohana_typing.get);
 
   const renderLoader = () => {
     if (status === "LoadingMore") {
@@ -37,7 +36,7 @@ export default function Index() {
 
   const handleLoadMore = () => {
     if (status === "CanLoadMore") {
-      loadMore(40);
+      loadMore(100);
     }
   };
 
@@ -67,14 +66,14 @@ export default function Index() {
             inverted
             keyboardShouldPersistTaps="handled"
             onEndReached={handleLoadMore}
-            onEndReachedThreshold={0.1}
+            onEndReachedThreshold={0.5}
             ListFooterComponent={renderLoader}
             ListHeaderComponent={() => (
               <View>
-                {isSohanaTyping && (
+                {!!sohana_typing?.text.length && (
                   <ChatBubble
                     message={results[0]}
-                    isTyping={isSohanaTyping}
+                    isTyping={sohana_typing?.text.length > 0}
                     isMe={false}
                   />
                 )}
@@ -84,7 +83,7 @@ export default function Index() {
         )}
       </View>
 
-      <ChatInput />
+      <ChatInput sohana_typing={sohana_typing?.text} />
     </View>
   );
 }

@@ -5,7 +5,7 @@ import { useChat } from "@/store/useChat";
 import Entypo from "@expo/vector-icons/Entypo";
 import Feather from "@expo/vector-icons/Feather";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { useMutation, useQuery } from "convex/react";
+import { useMutation } from "convex/react";
 import * as Haptics from "expo-haptics";
 import * as ImagePicker from "expo-image-picker";
 import React, { useEffect, useRef, useState } from "react";
@@ -19,7 +19,11 @@ import {
   View,
 } from "react-native";
 
-export default function ChatInput() {
+export default function ChatInput({
+  sohana_typing,
+}: {
+  sohana_typing: string | undefined;
+}) {
   const [typedMessage, setTypedMessage] = useState("");
   const [isSending, setIsSending] = useState(false);
   const [selectedImages, setSelectedImages] = useState<
@@ -31,8 +35,6 @@ export default function ChatInput() {
 
   const textInputRef = useRef<TextInput>(null);
   const { handleTyping } = useStatus();
-
-  const sohana_typing = useQuery(api.sohana_typing.get);
 
   const sendMessage = useMutation(api.message.send);
   const updateMessageMutation = useMutation(api.message.update);
@@ -151,7 +153,7 @@ export default function ChatInput() {
 
   return (
     <View style={styles.container}>
-      {!!sohana_typing?.text.length && (
+      {!!!!sohana_typing?.length && (
         <Text
           style={{
             fontFamily: "Outfit_400Regular",
@@ -161,7 +163,7 @@ export default function ChatInput() {
             color: "gray",
           }}
         >
-          {sohana_typing?.text}
+          {sohana_typing}
         </Text>
       )}
 
