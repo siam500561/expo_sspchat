@@ -7,9 +7,11 @@ import Feather from "@expo/vector-icons/Feather";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useMutation, useQuery } from "convex/react";
 import * as Haptics from "expo-haptics";
+import * as ImagePicker from "expo-image-picker";
 import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  Image,
   StyleSheet,
   Text,
   TextInput,
@@ -20,6 +22,10 @@ import {
 export default function ChatInput() {
   const [typedMessage, setTypedMessage] = useState("");
   const [isSending, setIsSending] = useState(false);
+  const [selectedImages, setSelectedImages] = useState<
+    ImagePicker.ImagePickerAsset[]
+  >([]);
+  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const { reply_message, message_for_update, message_for_update_id } =
     useChat();
 
@@ -30,9 +36,39 @@ export default function ChatInput() {
 
   const sendMessage = useMutation(api.message.send);
   const updateMessageMutation = useMutation(api.message.update);
+  const generateUploadUrl = useMutation(api.message.generateUploadUrl);
+
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsMultipleSelection: true, // Enable multiple selection
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setSelectedImages([...selectedImages, ...result.assets]);
+      setPreviewUrls([
+        ...previewUrls,
+        ...result.assets.map((asset) => asset.uri),
+      ]);
+    }
+  };
+
+  const removeImage = (index: number) => {
+    const newImages = [...selectedImages];
+    const newPreviews = [...previewUrls];
+    newImages.splice(index, 1);
+    newPreviews.splice(index, 1);
+    setSelectedImages(newImages);
+    setPreviewUrls(newPreviews);
+  };
 
   const onSendMessage = async () => {
-    if (typedMessage.trim().length === 0 || isSending) return;
+    if (
+      selectedImages.length === 0 &&
+      (typedMessage.trim().length === 0 || isSending)
+    )
+      return;
     setIsSending(true);
 
     const tempMessage = typedMessage;
@@ -46,6 +82,32 @@ export default function ChatInput() {
           _id: message_for_update_id,
           text: tempMessage.trim(),
         });
+      } else if (selectedImages.length > 0) {
+        for (const image of selectedImages) {
+          const postUrl = await generateUploadUrl();
+          // Convert the image file to a Blob
+          const response = await fetch(image.uri);
+          const blob = await response.blob();
+
+          // Upload the image to the generated URL
+          const result = await fetch(postUrl, {
+            method: "POST",
+            headers: { "Content-Type": image.mimeType as string },
+            body: blob,
+          });
+
+          const { storageId } = await result.json();
+
+          await sendMessage({
+            text: "",
+            format: "image",
+            username: "Siam",
+            replyingMessage: tempReplyMessage,
+            imageId: storageId,
+          });
+        }
+        setSelectedImages([]);
+        setPreviewUrls([]);
       } else {
         await sendMessage({
           text: tempMessage.trim(),
@@ -102,10 +164,34 @@ export default function ChatInput() {
           {sohana_typing?.text}
         </Text>
       )}
+
+      {previewUrls.length > 0 && (
+        <View style={styles.imagePreviewContainer}>
+          {previewUrls.map((url, index) => (
+            <View key={index} style={styles.imagePreviewWrapper}>
+              <Image source={{ uri: url }} style={styles.imagePreview} />
+              <TouchableOpacity
+                style={styles.removeImageButton}
+                onPress={() => removeImage(index)}
+              >
+                <Ionicons name="close-circle" size={20} color="white" />
+              </TouchableOpacity>
+            </View>
+          ))}
+        </View>
+      )}
+
       {!!(reply_message.length || message_for_update.length) && (
         <ReplyOrUpdateIndicator onClose={handleClose} />
       )}
       <View style={styles.inputContainer}>
+        <TouchableOpacity
+          onPress={pickImage}
+          style={styles.imagePickerButton}
+          disabled={!!typedMessage.length}
+        >
+          <Ionicons name="image" size={24} color="#4b5563" />
+        </TouchableOpacity>
         <TextInput
           ref={textInputRef}
           placeholder="Message"
@@ -114,6 +200,7 @@ export default function ChatInput() {
           onChangeText={setTypedMessage}
           onSubmitEditing={onSendMessage}
           multiline={true}
+          editable={selectedImages.length === 0}
         />
         <TouchableOpacity
           onPress={onSendMessage}
@@ -163,6 +250,33 @@ const ReplyOrUpdateIndicator = ({
 };
 
 const styles = StyleSheet.create({
+  imagePreviewContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    marginBottom: 8,
+  },
+  imagePreviewWrapper: {
+    position: "relative",
+    margin: 2,
+    marginHorizontal: 5,
+  },
+  imagePreview: {
+    width: 60,
+    height: 60,
+    borderRadius: 4,
+  },
+  removeImageButton: {
+    position: "absolute",
+    top: -8,
+    right: -8,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    borderRadius: 10,
+  },
+  imagePickerButton: {
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 5,
+  },
   sendButtonDisabled: {
     opacity: 0.5,
   },
