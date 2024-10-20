@@ -15,10 +15,12 @@ import type {
   FilterApi,
   FunctionReference,
 } from "convex/server";
+import type * as crons from "../crons.js";
 import type * as expoToken from "../expoToken.js";
 import type * as message from "../message.js";
 import type * as online from "../online.js";
 import type * as sohana_typing from "../sohana_typing.js";
+import type * as tasks from "../tasks.js";
 import type * as typing from "../typing.js";
 
 /**
@@ -30,10 +32,12 @@ import type * as typing from "../typing.js";
  * ```
  */
 declare const fullApi: ApiFromModules<{
+  crons: typeof crons;
   expoToken: typeof expoToken;
   message: typeof message;
   online: typeof online;
   sohana_typing: typeof sohana_typing;
+  tasks: typeof tasks;
   typing: typeof typing;
 }>;
 export declare const api: FilterApi<
