@@ -1,5 +1,6 @@
 import { api } from "@/convex/_generated/api";
 import { Doc, Id } from "@/convex/_generated/dataModel";
+import { useTheme } from "@/hooks/useTheme";
 import { wp } from "@/lib/dimensions";
 import { useChat } from "@/store/useChat";
 import { useMutation } from "convex/react";
@@ -99,6 +100,7 @@ const ChatBubble = (props: Props) => {
     }
   );
   const [isImageModalVisible, setIsImageModalVisible] = useState(false);
+  const { theme } = useTheme();
 
   const panResponder = PanResponder.create({
     onStartShouldSetPanResponder: () => true,
@@ -240,7 +242,9 @@ const ChatBubble = (props: Props) => {
         <View
           style={[
             styles.bubble,
-            isMe ? styles.bubbleMe : styles.bubbleOther,
+            isMe
+              ? [styles.bubbleMe, { backgroundColor: theme.bubbleMe }]
+              : [styles.bubbleOther, { backgroundColor: theme.bubbleOther }],
             { maxWidth: wp(90) },
           ]}
         >
@@ -272,7 +276,9 @@ const ChatBubble = (props: Props) => {
             <Text
               style={[
                 styles.messageText,
-                isMe ? styles.messageTextMe : styles.messageTextOther,
+                isMe
+                  ? [styles.messageTextMe, { color: theme.textMe }]
+                  : [styles.messageTextOther, { color: theme.textOther }],
               ]}
             >
               {message.text}
@@ -282,7 +288,9 @@ const ChatBubble = (props: Props) => {
           <Text
             style={[
               styles.timestamp,
-              isMe ? styles.timestampMe : styles.timestampOther,
+              isMe
+                ? [styles.timestampMe, { color: theme.textMe }]
+                : [styles.timestampOther, { color: theme.timeOther }],
               isTyping && styles.hidden,
             ]}
           >
@@ -316,11 +324,9 @@ const styles = StyleSheet.create({
     marginHorizontal: 8,
   },
   bubbleMe: {
-    backgroundColor: "#3b82f6",
     borderBottomRightRadius: 4,
   },
   bubbleOther: {
-    backgroundColor: "#f3f4f6",
     borderBottomLeftRadius: 4,
   },
   replyContainer: {

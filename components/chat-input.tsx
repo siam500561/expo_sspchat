@@ -1,6 +1,7 @@
 import { SIAM_TYPING_ID } from "@/constants/ids";
 import { api } from "@/convex/_generated/api";
 import { useStatus } from "@/hooks/useStatus";
+import { useTheme } from "@/hooks/useTheme";
 import { useChat } from "@/store/useChat";
 import Entypo from "@expo/vector-icons/Entypo";
 import Feather from "@expo/vector-icons/Feather";
@@ -151,8 +152,10 @@ export default function ChatInput({
     useChat.setState({ reply_message: "", message_for_update: "" });
   };
 
+  const { theme } = useTheme();
+
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
       {!!!!sohana_typing?.length && (
         <Text
           style={{
@@ -189,15 +192,23 @@ export default function ChatInput({
       <View style={styles.inputContainer}>
         <TouchableOpacity
           onPress={pickImage}
-          style={styles.imagePickerButton}
+          style={[styles.imagePickerButton]}
           disabled={!!typedMessage.length}
         >
-          <Ionicons name="image" size={24} color="#4b5563" />
+          <Ionicons name="image" size={24} color={theme.text} />
         </TouchableOpacity>
         <TextInput
           ref={textInputRef}
           placeholder="Message"
-          style={styles.textInput}
+          style={[
+            styles.textInput,
+            {
+              color: theme.text,
+              backgroundColor: theme.inputBackground,
+              borderColor: theme.inputBorder,
+            },
+          ]}
+          placeholderTextColor={theme.text}
           value={typedMessage}
           onChangeText={setTypedMessage}
           onSubmitEditing={onSendMessage}
@@ -206,14 +217,18 @@ export default function ChatInput({
         />
         <TouchableOpacity
           onPress={onSendMessage}
-          style={[styles.sendButton, isSending && styles.sendButtonDisabled]}
+          style={[
+            styles.sendButton,
+            isSending && styles.sendButtonDisabled,
+            { backgroundColor: theme.bubbleMe },
+          ]}
           disabled={isSending}
         >
           <View style={styles.sendButtonInner}>
             {isSending ? (
-              <ActivityIndicator size="small" color="#1e1e1e" />
+              <ActivityIndicator size="small" color={theme.textMe} />
             ) : (
-              <Feather name="send" size={16} color="#1e1e1e" />
+              <Feather name="send" size={16} color={theme.textMe} />
             )}
           </View>
         </TouchableOpacity>
@@ -298,7 +313,6 @@ const styles = StyleSheet.create({
     padding: 10,
     paddingHorizontal: 16,
     flex: 1,
-    backgroundColor: "white",
     maxHeight: 100,
     textAlignVertical: "center",
   },

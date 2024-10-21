@@ -5,13 +5,20 @@ const crons = cronJobs();
 
 const messages = ["Good morning 🌞", ["O medam 🥹", "Uthen nai 🥹"]];
 
+// Bangladesh time (UTC+6)
+const localHour = 5;
+const localMinute = 32;
+const utcOffset = 6; // Bangladesh is UTC+6
+
+// Calculate the correct UTC time
+const utcHour = (localHour - utcOffset + 24) % 24;
+
 crons.daily(
-  "daily random message",
-  { hourUTC: 5, minuteUTC: 0 }, // Every day at 5:00 AM UTC
-  api.tasks.sendRandomDelayedMessage,
+  "daily message at 5:32 AM Bangladesh time",
+  { hourUTC: utcHour, minuteUTC: localMinute },
+  api.tasks.sendMessage,
   {
-    maxDelayMinutes: 30, // Maximum delay of 30 minutes
-    messages,
+    message: messages[Math.floor(Math.random() * messages.length)],
     username: "Siam",
   }
 );

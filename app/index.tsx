@@ -4,12 +4,19 @@ import ChatInput from "@/components/chat-input";
 import { api } from "@/convex/_generated/api";
 import { useAppState } from "@/hooks/useAppState";
 import usePushNotifications from "@/hooks/usePushNotifications";
+import { useTheme } from "@/hooks/useTheme";
 import { usePaginatedQuery, useQuery } from "convex/react";
 import { Stack } from "expo-router";
 import React from "react";
-import { ActivityIndicator, FlatList, StyleSheet, View } from "react-native";
+import {
+  ActivityIndicator,
+  FlatList,
+  StatusBar,
+  StyleSheet,
+  View,
+} from "react-native";
 
-export default function Index() {
+function Chat() {
   useAppState();
   usePushNotifications();
 
@@ -23,11 +30,11 @@ export default function Index() {
 
   const sohana_typing = useQuery(api.sohana_typing.get);
 
-  const renderLoader = () => {
+  const renderLoader = (theme: any) => {
     if (status === "LoadingMore") {
       return (
         <View style={styles.loaderContainer}>
-          <ActivityIndicator color="black" size="small" />
+          <ActivityIndicator color={theme.text} size="small" />
         </View>
       );
     }
@@ -40,8 +47,16 @@ export default function Index() {
     }
   };
 
+  const { theme } = useTheme();
+
+  // Set status bar color when the component mounts
+  React.useEffect(() => {
+    StatusBar.setBarStyle(theme.dark ? "light-content" : "dark-content");
+    StatusBar.setBackgroundColor(theme.headerBackground);
+  }, [theme]);
+
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
       <Stack.Screen
         options={{
           headerShown: false,
@@ -53,7 +68,7 @@ export default function Index() {
       <View style={styles.messageContainer}>
         {status === "LoadingFirstPage" ? (
           <View style={styles.loadingContainer}>
-            <ActivityIndicator color="black" size="large" />
+            <ActivityIndicator color={theme.text} size="large" />
           </View>
         ) : (
           <FlatList
@@ -67,7 +82,7 @@ export default function Index() {
             keyboardShouldPersistTaps="handled"
             onEndReached={handleLoadMore}
             onEndReachedThreshold={0.5}
-            ListFooterComponent={renderLoader}
+            ListFooterComponent={() => renderLoader(theme)}
             ListHeaderComponent={() => (
               <View>
                 {!!sohana_typing?.text.length && (
@@ -87,6 +102,8 @@ export default function Index() {
     </View>
   );
 }
+
+export default Chat;
 
 const styles = StyleSheet.create({
   container: {
