@@ -19,15 +19,15 @@ const lightTheme = {
 const darkTheme = {
   dark: true,
   background: "#121212", // Premium black
-  headerBackground: "#1e1e1e", // Slightly lighter than background
+  headerBackground: "transparent", // Slightly lighter than background
   text: "#e2e8f0",
-  bubbleMe: "#8b5cf6", // Purple color for dark theme
+  bubbleMe: "#7646ff", // Purple color for dark theme
   bubbleOther: "#2a2a2a", // Slightly lighter than background
   textMe: "#ffffff",
   textOther: "#e2e8f0",
   timeOther: "#a0aec0", // Lighter color for better visibility
-  inputBackground: "#2a2a2a", // Same as bubbleOther for consistency
-  inputBorder: "#3f3f3f", // Slightly off-white for dark mode
+  inputBackground: "#1e1e1e", // Same as bubbleOther for consistency
+  inputBorder: "#333", // Slightly off-white for dark mode
 };
 
 type Theme = typeof lightTheme;
@@ -38,7 +38,7 @@ interface ThemeState {
 }
 
 export const useThemeStore = create<ThemeState>((set) => ({
-  theme: lightTheme,
+  theme: darkTheme, // Changed this line to use darkTheme as the default
   toggleTheme: () =>
     set((state) => ({ theme: state.theme.dark ? lightTheme : darkTheme })),
 }));

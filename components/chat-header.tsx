@@ -24,7 +24,7 @@ export default function ChatHeader() {
       <TouchableOpacity onPress={toggleTheme} style={styles.themeToggle}>
         <Ionicons
           name={theme.dark ? "moon" : "sunny"}
-          size={24}
+          size={20}
           color={theme.text}
         />
       </TouchableOpacity>
@@ -36,7 +36,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingVertical: 12,
+    paddingVertical: 8,
     paddingHorizontal: 24,
     marginTop: 32,
   },

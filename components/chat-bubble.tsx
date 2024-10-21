@@ -3,6 +3,7 @@ import { Doc, Id } from "@/convex/_generated/dataModel";
 import { useTheme } from "@/hooks/useTheme";
 import { wp } from "@/lib/dimensions";
 import { useChat } from "@/store/useChat";
+import { Ionicons } from "@expo/vector-icons";
 import { useMutation } from "convex/react";
 import { format } from "date-fns";
 import * as FileSystem from "expo-file-system";
@@ -92,6 +93,30 @@ const ChatBubble = (props: Props) => {
   );
   const [isImageModalVisible, setIsImageModalVisible] = useState(false);
   const { theme } = useTheme();
+  const [isImageLoading, setIsImageLoading] = useState(true);
+  const fadeAnim = useRef(new Animated.Value(0.6)).current;
+
+  // Add this useEffect for the fading animation
+  React.useEffect(() => {
+    if (isImageLoading) {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(fadeAnim, {
+            toValue: 1,
+            duration: 1000,
+            useNativeDriver: true,
+          }),
+          Animated.timing(fadeAnim, {
+            toValue: 0.6,
+            duration: 1000,
+            useNativeDriver: true,
+          }),
+        ])
+      ).start();
+    } else {
+      fadeAnim.setValue(1);
+    }
+  }, [isImageLoading, fadeAnim]);
 
   const panResponder = PanResponder.create({
     onStartShouldSetPanResponder: () => true,
@@ -131,6 +156,7 @@ const ChatBubble = (props: Props) => {
   const handleImageLoad = (event: NativeSyntheticEvent<ImageLoadEventData>) => {
     const { width, height } = event.nativeEvent.source;
     setAspectRatio(width / height);
+    setIsImageLoading(false);
   };
 
   const handleDelete = () => {
@@ -201,17 +227,34 @@ const ChatBubble = (props: Props) => {
           onPress={handleImagePress}
           onLongPress={handleImageLongPress}
           delayLongPress={500}
+          style={[
+            styles.imageWrapper,
+            isMe ? styles.imageWrapperMe : styles.imageWrapperOther,
+          ]}
         >
-          <Image
-            source={{ uri: message.imageUrl }}
-            style={[
-              styles.image,
-              { aspectRatio },
-              isMe ? styles.imageMe : styles.imageOther,
-            ]}
-            resizeMode="contain"
-            onLoad={handleImageLoad}
-          />
+          <View style={[styles.imageContainer, { aspectRatio }]}>
+            {isImageLoading && (
+              <Animated.View
+                style={[styles.skeletonContainer, { opacity: fadeAnim }]}
+              >
+                <Ionicons
+                  name="image-outline"
+                  size={24}
+                  color={isMe ? theme.textMe : theme.textOther}
+                />
+              </Animated.View>
+            )}
+            <Image
+              source={{ uri: message.imageUrl }}
+              style={[
+                styles.image,
+                { aspectRatio },
+                isImageLoading && styles.hiddenImage,
+              ]}
+              resizeMode="cover"
+              onLoad={handleImageLoad}
+            />
+          </View>
         </TouchableOpacity>
         <Modal
           visible={isImageModalVisible}
@@ -313,12 +356,6 @@ const ChatBubble = (props: Props) => {
 };
 
 const styles = StyleSheet.create({
-  image: {
-    width: "75%",
-    marginVertical: 1.5,
-    marginHorizontal: 8,
-    borderRadius: 24,
-  },
   imageMe: {
     alignSelf: "flex-end",
     borderBottomRightRadius: 4,
@@ -412,6 +449,44 @@ const styles = StyleSheet.create({
   fullScreenImage: {
     width: Dimensions.get("window").width,
     height: Dimensions.get("window").height,
+  },
+  imageContainerLoading: {
+    padding: 0, // Remove padding when loading
+  },
+  imageWrapper: {
+    maxWidth: "75%",
+    marginVertical: 1.5,
+    marginHorizontal: 8,
+  },
+  imageWrapperMe: {
+    alignSelf: "flex-end",
+  },
+  imageWrapperOther: {
+    alignSelf: "flex-start",
+  },
+  imageContainer: {
+    width: "100%",
+    borderRadius: 12,
+    overflow: "hidden",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  image: {
+    width: "100%",
+    height: "100%",
+  },
+  skeletonContainer: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.1)",
+  },
+  hiddenImage: {
+    opacity: 0,
   },
 });
 

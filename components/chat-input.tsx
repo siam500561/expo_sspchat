@@ -13,6 +13,7 @@ import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Image,
+  LayoutChangeEvent,
   StyleSheet,
   Text,
   TextInput,
@@ -154,18 +155,36 @@ export default function ChatInput({
 
   const { theme } = useTheme();
 
+  const [inputHeight, setInputHeight] = useState(0);
+  const [inputWidth, setInputWidth] = useState(0);
+
+  const handleContentSizeChange = (event: LayoutChangeEvent) => {
+    setInputHeight(event.nativeEvent.layout.height);
+    setInputWidth(event.nativeEvent.layout.width);
+  };
+
+  const calculateBorderRadius = () => {
+    const baseRadius = 32; // Full roundness for empty or single line input
+    const minRadius = 25; // Minimum border radius
+    const maxLines = 4; // Assume 4 lines is when we reach minimum radius
+
+    if (inputHeight <= 40) {
+      // Approximate height for a single line
+      return baseRadius;
+    }
+
+    const linesEstimate = Math.min(inputHeight / 20, maxLines); // Rough estimate of lines (20px per line)
+    const radiusReduction =
+      (baseRadius - minRadius) * ((linesEstimate - 1) / (maxLines - 1));
+    return Math.max(baseRadius - radiusReduction, minRadius);
+  };
+
+  const borderRadius = calculateBorderRadius();
+
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
       {!!!!sohana_typing?.length && (
-        <Text
-          style={{
-            fontFamily: "Outfit_400Regular",
-            fontSize: 11,
-            marginBottom: 6,
-            textAlign: "center",
-            color: "gray",
-          }}
-        >
+        <Text style={[styles.typingIndicator, { color: "gray" }]}>
           {sohana_typing}
         </Text>
       )}
@@ -189,32 +208,37 @@ export default function ChatInput({
       {!!(reply_message.length || message_for_update.length) && (
         <ReplyOrUpdateIndicator onClose={handleClose} />
       )}
-      <View style={styles.inputContainer}>
-        <TouchableOpacity
-          onPress={pickImage}
-          style={[styles.imagePickerButton]}
-          disabled={!!typedMessage.length}
-        >
-          <Ionicons name="image" size={24} color={theme.text} />
-        </TouchableOpacity>
-        <TextInput
-          ref={textInputRef}
-          placeholder="Message"
-          style={[
-            styles.textInput,
-            {
-              color: theme.text,
-              backgroundColor: theme.inputBackground,
-              borderColor: theme.inputBorder,
-            },
-          ]}
-          placeholderTextColor={theme.text}
-          value={typedMessage}
-          onChangeText={setTypedMessage}
-          onSubmitEditing={onSendMessage}
-          multiline={true}
-          editable={selectedImages.length === 0}
-        />
+
+      <View style={styles.inputWrapper}>
+        <View style={styles.inputContainer}>
+          <TouchableOpacity
+            onPress={pickImage}
+            style={[styles.imagePickerButton]}
+            disabled={!!typedMessage.length}
+          >
+            <Ionicons name="image" size={20} color={theme.text} />
+          </TouchableOpacity>
+          <TextInput
+            ref={textInputRef}
+            placeholder="Message"
+            style={[
+              styles.textInput,
+              {
+                color: theme.text,
+                backgroundColor: theme.inputBackground,
+                borderColor: theme.inputBorder,
+                borderRadius: borderRadius,
+              },
+            ]}
+            placeholderTextColor={theme.text}
+            value={typedMessage}
+            onChangeText={setTypedMessage}
+            onSubmitEditing={onSendMessage}
+            multiline={true}
+            editable={selectedImages.length === 0}
+            onLayout={handleContentSizeChange}
+          />
+        </View>
         <TouchableOpacity
           onPress={onSendMessage}
           style={[
@@ -316,14 +340,18 @@ const styles = StyleSheet.create({
     padding: 8,
     paddingVertical: 8,
   },
+  inputWrapper: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+  },
   inputContainer: {
     flexDirection: "row",
+    flex: 1,
     gap: 4,
   },
   textInput: {
     fontFamily: "Outfit_400Regular",
     borderWidth: 1,
-    borderRadius: 32,
     borderColor: "#d1d5db",
     padding: 10,
     paddingHorizontal: 16,
@@ -336,8 +364,9 @@ const styles = StyleSheet.create({
     borderRadius: 28,
     alignItems: "center",
     justifyContent: "center",
-    width: 56,
-    height: 56,
+    width: 50,
+    height: 50,
+    marginLeft: 4,
   },
   sendButtonInner: {
     alignItems: "center",
@@ -367,5 +396,11 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#4b5563",
     fontFamily: "Outfit_400Regular",
+  },
+  typingIndicator: {
+    fontFamily: "Outfit_400Regular",
+    fontSize: 11,
+    marginBottom: 6,
+    textAlign: "center",
   },
 });
