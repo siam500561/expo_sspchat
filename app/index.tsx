@@ -6,6 +6,7 @@ import { useAppState } from "@/hooks/useAppState";
 import usePushNotifications from "@/hooks/usePushNotifications";
 import { useTheme } from "@/hooks/useTheme";
 import { usePaginatedQuery, useQuery } from "convex/react";
+import { LinearGradient } from "expo-linear-gradient";
 import { Stack } from "expo-router";
 import React from "react";
 import { ActivityIndicator, FlatList, StyleSheet, View } from "react-native";
@@ -51,38 +52,48 @@ function Chat() {
         }}
       />
 
-      <ChatHeader />
-
       <View style={styles.messageContainer}>
         {status === "LoadingFirstPage" ? (
           <View style={styles.loadingContainer}>
             <ActivityIndicator color={theme.text} size="large" />
           </View>
         ) : (
-          <FlatList
-            data={results}
-            keyExtractor={(item) => item._id}
-            renderItem={({ item }) => (
-              <ChatBubble message={item} isMe={item.username === "Siam"} />
-            )}
-            showsVerticalScrollIndicator={false}
-            inverted
-            keyboardShouldPersistTaps="handled"
-            onEndReached={handleLoadMore}
-            onEndReachedThreshold={0.5}
-            ListFooterComponent={() => renderLoader(theme)}
-            ListHeaderComponent={() => (
-              <View>
-                {!!sohana_typing?.text.length && (
-                  <ChatBubble
-                    message={results[0]}
-                    isTyping={sohana_typing?.text.length > 0}
-                    isMe={false}
-                  />
-                )}
-              </View>
-            )}
-          />
+          <>
+            <LinearGradient
+              colors={[
+                theme.dark ? "rgba(0,0,0,0.95)" : "rgba(255,255,255,0.95)",
+                theme.dark ? "rgba(0,0,0,0.8)" : "rgba(255,255,255,0.8)",
+                theme.dark ? "rgba(0,0,0,0.4)" : "rgba(255,255,255,0.4)",
+                "transparent",
+              ]}
+              style={styles.gradientOverlay}
+            />
+            <ChatHeader />
+            <FlatList
+              data={results}
+              keyExtractor={(item) => item._id}
+              renderItem={({ item }) => (
+                <ChatBubble message={item} isMe={item.username === "Siam"} />
+              )}
+              showsVerticalScrollIndicator={false}
+              inverted
+              keyboardShouldPersistTaps="handled"
+              onEndReached={handleLoadMore}
+              onEndReachedThreshold={0.5}
+              ListFooterComponent={() => renderLoader(theme)}
+              ListHeaderComponent={() => (
+                <View>
+                  {!!sohana_typing?.text.length && (
+                    <ChatBubble
+                      message={results[0]}
+                      isTyping={sohana_typing?.text.length > 0}
+                      isMe={false}
+                    />
+                  )}
+                </View>
+              )}
+            />
+          </>
         )}
       </View>
 
@@ -109,5 +120,13 @@ const styles = StyleSheet.create({
   loaderContainer: {
     paddingVertical: 20,
     alignItems: "center",
+  },
+  gradientOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 150,
+    zIndex: 1,
   },
 });

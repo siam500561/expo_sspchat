@@ -1,44 +1,39 @@
 import { api } from "@/convex/_generated/api";
 import { useTheme } from "@/hooks/useTheme";
-import { Ionicons } from "@expo/vector-icons";
 import { useQuery } from "convex/react";
 import React from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, Text, TouchableOpacity } from "react-native";
 
 export default function ChatHeader() {
   const isSohanaOnline = useQuery(api.online.get)?.sohana?.online;
   const { theme, toggleTheme } = useTheme();
 
   return (
-    <View
-      style={[styles.container, { backgroundColor: theme.headerBackground }]}
-    >
+    <TouchableOpacity onPress={toggleTheme} style={styles.container}>
       <Text
         style={[
           styles.statusText,
+          { color: theme.text },
           isSohanaOnline ? styles.onlineText : styles.offlineText,
         ]}
       >
         Sohana is {isSohanaOnline ? "online" : "offline"}
       </Text>
-      <TouchableOpacity onPress={toggleTheme} style={styles.themeToggle}>
-        <Ionicons
-          name={theme.dark ? "moon" : "sunny"}
-          size={20}
-          color={theme.text}
-        />
-      </TouchableOpacity>
-    </View>
+    </TouchableOpacity>
   );
 }
+
 const styles = StyleSheet.create({
   container: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 2,
+    justifyContent: "center",
     alignItems: "center",
-    paddingVertical: 8,
-    paddingHorizontal: 24,
-    marginTop: 32,
+    paddingTop: 42, // Increased from 16 to 60 to move the text down
+    paddingBottom: 16,
   },
   statusText: {
     fontSize: 14,
@@ -49,8 +44,5 @@ const styles = StyleSheet.create({
   },
   offlineText: {
     color: "#ef4444", // red-500
-  },
-  themeToggle: {
-    padding: 8,
   },
 });
