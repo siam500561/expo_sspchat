@@ -244,22 +244,37 @@ const ReplyOrUpdateIndicator = ({
 }) => {
   const { reply_message, message_for_update } = useChat();
   const isReply = !!reply_message.length;
+  const { theme } = useTheme();
 
   return (
-    <View style={styles.indicatorContainer}>
-      <Entypo name={isReply ? "reply" : "pencil"} size={16} color="gray" />
+    <View
+      style={[styles.indicatorContainer, { borderColor: theme.inputBorder }]}
+    >
+      <Entypo
+        name={isReply ? "reply" : "pencil"}
+        size={16}
+        color={theme.text}
+      />
       <View style={styles.indicatorTextContainer}>
-        <Text style={styles.indicatorTitle}>
+        <Text
+          style={[
+            styles.indicatorTitle,
+            { color: theme.dark ? "#e0e0e0" : theme.text },
+          ]}
+        >
           {isReply ? "Replying to" : "Update"}:
         </Text>
-        <Text numberOfLines={1} style={styles.indicatorMessage}>
+        <Text
+          numberOfLines={1}
+          style={[styles.indicatorMessage, { color: theme.timeOther }]}
+        >
           {isReply ? reply_message : message_for_update}
         </Text>
       </View>
       <Ionicons
         name="close"
         size={20}
-        color="gray"
+        color={theme.text}
         onPress={() => onClose(isReply)}
       />
     </View>
@@ -333,7 +348,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderWidth: 1,
     borderBottomWidth: 0,
-    borderColor: "#e5e7eb",
     borderRadius: 24,
     padding: 10,
     paddingBottom: 16,

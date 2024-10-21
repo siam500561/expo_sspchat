@@ -8,13 +8,7 @@ import { useTheme } from "@/hooks/useTheme";
 import { usePaginatedQuery, useQuery } from "convex/react";
 import { Stack } from "expo-router";
 import React from "react";
-import {
-  ActivityIndicator,
-  FlatList,
-  StatusBar,
-  StyleSheet,
-  View,
-} from "react-native";
+import { ActivityIndicator, FlatList, StyleSheet, View } from "react-native";
 
 function Chat() {
   useAppState();
@@ -48,12 +42,6 @@ function Chat() {
   };
 
   const { theme } = useTheme();
-
-  // Set status bar color when the component mounts
-  React.useEffect(() => {
-    StatusBar.setBarStyle(theme.dark ? "light-content" : "dark-content");
-    StatusBar.setBackgroundColor(theme.headerBackground);
-  }, [theme]);
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>

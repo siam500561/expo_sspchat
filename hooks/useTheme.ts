@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { StatusBar } from "react-native";
 import { create } from "zustand";
 
@@ -35,13 +36,20 @@ interface ThemeState {
   theme: Theme;
   toggleTheme: () => void;
 }
-export const useTheme = create<ThemeState>((set) => ({
+
+export const useThemeStore = create<ThemeState>((set) => ({
   theme: lightTheme,
   toggleTheme: () =>
-    set((state) => {
-      const newTheme = state.theme.dark ? lightTheme : darkTheme;
-      StatusBar.setBarStyle(newTheme.dark ? "light-content" : "dark-content");
-      StatusBar.setBackgroundColor(newTheme.headerBackground);
-      return { theme: newTheme };
-    }),
+    set((state) => ({ theme: state.theme.dark ? lightTheme : darkTheme })),
 }));
+
+export const useTheme = () => {
+  const { theme, toggleTheme } = useThemeStore();
+
+  useEffect(() => {
+    StatusBar.setBarStyle(theme.dark ? "light-content" : "dark-content");
+    StatusBar.setBackgroundColor(theme.headerBackground);
+  }, [theme]);
+
+  return { theme, toggleTheme };
+};

@@ -49,25 +49,16 @@ const downloadImage = async (imageUrl: string) => {
 
     const downloaded = await downloadResumable.downloadAsync();
 
-    Alert.alert("Download Photo", "Do you want to download this photo?", [
-      {
-        text: "Cancel",
-        style: "cancel",
-      },
-      {
-        text: "Download",
-        onPress: async () => {
-          try {
-            const asset = await MediaLibrary.createAssetAsync(downloaded!.uri);
-            await MediaLibrary.createAlbumAsync("Downloads", asset, false);
-            alert("Image saved to gallery!");
-          } catch (error) {
-            console.error("Error saving image:", error);
-            alert("Failed to save image.");
-          }
-        },
-      },
-    ]);
+    if (downloaded) {
+      try {
+        const asset = await MediaLibrary.createAssetAsync(downloaded.uri);
+        await MediaLibrary.createAlbumAsync("Downloads", asset, false);
+        alert("Image saved to gallery!");
+      } catch (error) {
+        console.error("Error saving image:", error);
+        alert("Failed to save image.");
+      }
+    }
   } catch (error) {
     console.error("Error downloading image:", error);
     alert("Failed to download image.");
@@ -165,31 +156,50 @@ const ChatBubble = (props: Props) => {
     );
   };
 
+  const handleImageAction = () => {
+    if (isMe) {
+      handleDelete();
+    } else {
+      Alert.alert("Download Photo", "Do you want to download this photo?", [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Download",
+          onPress: () => downloadImage(message.imageUrl!),
+        },
+      ]);
+    }
+  };
+
+  const handleImagePress = () => {
+    setIsImageModalVisible(true);
+  };
+
+  const handleImageLongPress = () => {
+    if (isMe) {
+      handleDelete();
+    } else {
+      Alert.alert("Download Photo", "Do you want to download this photo?", [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Download",
+          onPress: () => downloadImage(message.imageUrl!),
+        },
+      ]);
+    }
+  };
+
   if (message.imageUrl) {
     return (
       <>
         <TouchableOpacity
-          onPress={() => setIsImageModalVisible(true)}
-          onLongPress={() => {
-            Alert.alert(
-              isMe ? "Delete Photo" : "Download Photo",
-              isMe
-                ? "Do you want to delete this photo?"
-                : "Do you want to download this photo?",
-              [
-                {
-                  text: "Cancel",
-                  style: "cancel",
-                },
-                {
-                  text: isMe ? "Delete" : "Download",
-                  onPress: () => {
-                    isMe ? handleDelete() : downloadImage(message.imageUrl!);
-                  },
-                },
-              ]
-            );
-          }}
+          onPress={handleImagePress}
+          onLongPress={handleImageLongPress}
           delayLongPress={500}
         >
           <Image
