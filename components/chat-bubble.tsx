@@ -29,6 +29,8 @@ type Props = {
   message: Doc<"messages">;
   isTyping?: boolean;
   isMe: boolean;
+  isFirstInGroup: boolean;
+  isLastInGroup: boolean;
 };
 
 const downloadImage = async (imageUrl: string) => {
@@ -74,7 +76,7 @@ function formatDateString(dateString: string): string {
 }
 
 const ChatBubble = (props: Props) => {
-  const { isTyping, isMe, message } = props;
+  const { isTyping, isMe, message, isFirstInGroup, isLastInGroup } = props;
   const [aspectRatio, setAspectRatio] = useState(1);
   const translateX = useRef(new Animated.Value(0)).current;
   const rightSwipeThreshold = 70;
@@ -182,23 +184,6 @@ const ChatBubble = (props: Props) => {
     );
   };
 
-  const handleImageAction = () => {
-    if (isMe) {
-      handleDelete();
-    } else {
-      Alert.alert("Download Photo", "Do you want to download this photo?", [
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
-        {
-          text: "Download",
-          onPress: () => downloadImage(message.imageUrl!),
-        },
-      ]);
-    }
-  };
-
   const handleImagePress = () => {
     setIsImageModalVisible(true);
   };
@@ -217,6 +202,38 @@ const ChatBubble = (props: Props) => {
           onPress: () => downloadImage(message.imageUrl!),
         },
       ]);
+    }
+  };
+
+  const getBubbleStyle = () => {
+    const baseStyle = [
+      styles.bubble,
+      isMe
+        ? [styles.bubbleMe, { backgroundColor: theme.bubbleMe }]
+        : [styles.bubbleOther, { backgroundColor: theme.bubbleOther }],
+      { maxWidth: wp(90) },
+    ];
+
+    if (isFirstInGroup && isLastInGroup) {
+      return [
+        ...baseStyle,
+        isMe ? styles.bubbleMeSingle : styles.bubbleOtherSingle,
+      ];
+    } else if (isFirstInGroup) {
+      return [
+        ...baseStyle,
+        isMe ? styles.bubbleMeFirst : styles.bubbleOtherFirst,
+      ];
+    } else if (isLastInGroup) {
+      return [
+        ...baseStyle,
+        isMe ? styles.bubbleMeLast : styles.bubbleOtherLast,
+      ];
+    } else {
+      return [
+        ...baseStyle,
+        isMe ? styles.bubbleMeMiddle : styles.bubbleOtherMiddle,
+      ];
     }
   };
 
@@ -292,15 +309,7 @@ const ChatBubble = (props: Props) => {
         delayLongPress={500}
         activeOpacity={0.7}
       >
-        <View
-          style={[
-            styles.bubble,
-            isMe
-              ? [styles.bubbleMe, { backgroundColor: theme.bubbleMe }]
-              : [styles.bubbleOther, { backgroundColor: theme.bubbleOther }],
-            { maxWidth: wp(90) },
-          ]}
-        >
+        <View style={getBubbleStyle()}>
           {message.replyingMessage && !isTyping && (
             <View
               style={[
@@ -371,10 +380,52 @@ const styles = StyleSheet.create({
     marginHorizontal: 8,
   },
   bubbleMe: {
-    borderBottomRightRadius: 4,
+    // Remove borderBottomRightRadius from here
   },
   bubbleOther: {
+    // Remove borderBottomLeftRadius from here
+  },
+  bubbleMeSingle: {
+    borderRadius: 20,
+  },
+  bubbleOtherSingle: {
+    borderRadius: 20,
+  },
+  bubbleMeFirst: {
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 4,
+  },
+  bubbleOtherFirst: {
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
     borderBottomLeftRadius: 4,
+    borderBottomRightRadius: 20,
+  },
+  bubbleMeLast: {
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 4,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+  },
+  bubbleOtherLast: {
+    borderTopLeftRadius: 4,
+    borderTopRightRadius: 20,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+  },
+  bubbleMeMiddle: {
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 4,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 4,
+  },
+  bubbleOtherMiddle: {
+    borderTopLeftRadius: 4,
+    borderTopRightRadius: 20,
+    borderBottomLeftRadius: 4,
+    borderBottomRightRadius: 20,
   },
   replyContainer: {
     borderLeftWidth: 2,
@@ -414,9 +465,9 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
   },
   messageText: {
-    fontSize: 16,
-    fontFamily: "Outfit_400Regular",
-    lineHeight: 24,
+    fontSize: 16.2,
+    fontFamily: "Helvetica",
+    lineHeight: 26,
   },
   messageTextMe: {
     color: "white",

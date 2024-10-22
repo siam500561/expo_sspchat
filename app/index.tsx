@@ -44,6 +44,23 @@ function Chat() {
 
   const { theme } = useTheme();
 
+  const renderMessage = ({ item, index }: { item: any; index: number }) => {
+    const isFirstInGroup =
+      index === results.length - 1 ||
+      results[index + 1].username !== item.username;
+    const isLastInGroup =
+      index === 0 || results[index - 1].username !== item.username;
+
+    return (
+      <ChatBubble
+        message={item}
+        isMe={item.username === "Siam"}
+        isFirstInGroup={isFirstInGroup}
+        isLastInGroup={isLastInGroup}
+      />
+    );
+  };
+
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
       <Stack.Screen
@@ -72,9 +89,7 @@ function Chat() {
             <FlatList
               data={results}
               keyExtractor={(item) => item._id}
-              renderItem={({ item }) => (
-                <ChatBubble message={item} isMe={item.username === "Siam"} />
-              )}
+              renderItem={renderMessage}
               showsVerticalScrollIndicator={false}
               inverted
               keyboardShouldPersistTaps="handled"
@@ -88,6 +103,8 @@ function Chat() {
                       message={results[0]}
                       isTyping={sohana_typing?.text.length > 0}
                       isMe={false}
+                      isFirstInGroup={true}
+                      isLastInGroup={true}
                     />
                   )}
                 </View>
@@ -126,7 +143,7 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
-    height: 150,
+    height: 120,
     zIndex: 1,
   },
 });

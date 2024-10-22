@@ -20,6 +20,7 @@ export default function RootLayout() {
     Outfit_400Regular,
     Outfit_500Medium,
     Outfit_700Bold,
+    Helvetica: require("../assets/fonts/Helvetica.ttf"), // Add this line
   });
 
   useEffect(() => {
