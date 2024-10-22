@@ -5,11 +5,15 @@ import React from "react";
 import { StyleSheet, Text, TouchableOpacity } from "react-native";
 
 export default function ChatHeader() {
+  // Query to check if Sohana is online
   const isSohanaOnline = useQuery(api.online.get)?.sohana?.online;
+
+  // Hook to access and toggle the theme
   const { theme, toggleTheme } = useTheme();
 
   return (
     <TouchableOpacity onPress={toggleTheme} style={styles.container}>
+      {/* Display Sohana's online status */}
       <Text
         style={[
           styles.statusText,
@@ -23,6 +27,7 @@ export default function ChatHeader() {
   );
 }
 
+// Styles definition
 const styles = StyleSheet.create({
   container: {
     position: "absolute",

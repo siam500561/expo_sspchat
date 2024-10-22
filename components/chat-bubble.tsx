@@ -33,6 +33,7 @@ type Props = {
   isLastInGroup: boolean;
 };
 
+// Function to download an image to the device's gallery
 const downloadImage = async (imageUrl: string) => {
   if (!imageUrl) return;
 
@@ -68,6 +69,7 @@ const downloadImage = async (imageUrl: string) => {
   }
 };
 
+// Function to format the date string for message timestamps
 function formatDateString(dateString: string): string {
   const dateNumber = Math.floor(Number(dateString));
   const date = new Date(dateNumber);
@@ -120,6 +122,7 @@ const ChatBubble = (props: Props) => {
     }
   }, [isImageLoading, fadeAnim]);
 
+  // Pan responder for swipe gestures
   const panResponder = PanResponder.create({
     onStartShouldSetPanResponder: () => true,
     onMoveShouldSetPanResponder: (_, gestureState) => {
@@ -155,12 +158,14 @@ const ChatBubble = (props: Props) => {
     },
   });
 
+  // Handler for image load event
   const handleImageLoad = (event: NativeSyntheticEvent<ImageLoadEventData>) => {
     const { width, height } = event.nativeEvent.source;
     setAspectRatio(width / height);
     setIsImageLoading(false);
   };
 
+  // Handler for deleting a message
   const handleDelete = () => {
     if (!isMe) return;
     Alert.alert(
@@ -184,10 +189,12 @@ const ChatBubble = (props: Props) => {
     );
   };
 
+  // Handler for pressing an image
   const handleImagePress = () => {
     setIsImageModalVisible(true);
   };
 
+  // Handler for long-pressing an image
   const handleImageLongPress = () => {
     if (isMe) {
       handleDelete();
@@ -205,6 +212,7 @@ const ChatBubble = (props: Props) => {
     }
   };
 
+  // Function to determine the bubble style based on its position in the group
   const getBubbleStyle = () => {
     const baseStyle = [
       styles.bubble,
@@ -237,6 +245,7 @@ const ChatBubble = (props: Props) => {
     }
   };
 
+  // Render logic for image messages
   if (message.imageUrl) {
     return (
       <>
@@ -294,6 +303,7 @@ const ChatBubble = (props: Props) => {
     );
   }
 
+  // Render logic for text messages
   return (
     <Animated.View
       {...(message.text ? panResponder.panHandlers : {})}
@@ -364,6 +374,7 @@ const ChatBubble = (props: Props) => {
   );
 };
 
+// Styles definition
 const styles = StyleSheet.create({
   imageMe: {
     alignSelf: "flex-end",

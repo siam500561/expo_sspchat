@@ -42,6 +42,7 @@ export default function ChatInput({
   const updateMessageMutation = useMutation(api.message.update);
   const generateUploadUrl = useMutation(api.message.generateUploadUrl);
 
+  // Function to pick images from the device's gallery
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -58,6 +59,7 @@ export default function ChatInput({
     }
   };
 
+  // Function to remove a selected image
   const removeImage = (index: number) => {
     const newImages = [...selectedImages];
     const newPreviews = [...previewUrls];
@@ -67,6 +69,7 @@ export default function ChatInput({
     setPreviewUrls(newPreviews);
   };
 
+  // Function to send a message (text or image)
   const onSendMessage = async () => {
     if (
       selectedImages.length === 0 &&
@@ -128,6 +131,7 @@ export default function ChatInput({
     }
   };
 
+  // Effect to handle typing indicator
   useEffect(() => {
     if (typedMessage.length === 1) {
       handleTyping(SIAM_TYPING_ID, true);
@@ -136,6 +140,7 @@ export default function ChatInput({
     }
   }, [typedMessage]);
 
+  // Effect to focus input when replying or updating a message
   useEffect(() => {
     if (reply_message && textInputRef.current) {
       textInputRef.current.focus();
@@ -145,6 +150,7 @@ export default function ChatInput({
     }
   }, [reply_message, message_for_update]);
 
+  // Function to handle closing reply or update mode
   const handleClose = (isReply: boolean) => {
     if (!isReply) {
       // If closing an update, clear the typed message
@@ -158,11 +164,13 @@ export default function ChatInput({
   const [inputHeight, setInputHeight] = useState(0);
   const [inputWidth, setInputWidth] = useState(0);
 
+  // Function to handle input size changes
   const handleContentSizeChange = (event: LayoutChangeEvent) => {
     setInputHeight(event.nativeEvent.layout.height);
     setInputWidth(event.nativeEvent.layout.width);
   };
 
+  // Function to calculate border radius based on input height
   const calculateBorderRadius = () => {
     const baseRadius = 32; // Full roundness for empty or single line input
     const minRadius = 25; // Minimum border radius
@@ -261,6 +269,7 @@ export default function ChatInput({
   );
 }
 
+// Component to display reply or update indicator
 const ReplyOrUpdateIndicator = ({
   onClose,
 }: {
