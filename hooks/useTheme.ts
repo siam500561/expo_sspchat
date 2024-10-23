@@ -18,11 +18,11 @@ const lightTheme = {
 
 const darkTheme = {
   dark: true,
-  background: "#121212", // Premium black
+  background: "#030303", // Premium black
   headerBackground: "transparent", // Slightly lighter than background
   text: "#e2e8f0",
   bubbleMe: "#7646ff", // Purple color for dark theme
-  bubbleOther: "#2a2a2a", // Slightly lighter than background
+  bubbleOther: "#1c1c1c", // Slightly lighter than background
   textMe: "#ffffff",
   textOther: "#e2e8f0",
   timeOther: "#a0aec0", // Lighter color for better visibility

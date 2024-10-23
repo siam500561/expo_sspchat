@@ -217,8 +217,8 @@ const ChatBubble = (props: Props) => {
     const baseStyle = [
       styles.bubble,
       isMe
-        ? [styles.bubbleMe, { backgroundColor: theme.bubbleMe }]
-        : [styles.bubbleOther, { backgroundColor: theme.bubbleOther }],
+        ? [{ backgroundColor: theme.bubbleMe }]
+        : [{ backgroundColor: theme.bubbleOther }],
       { maxWidth: wp(90) },
     ];
 
@@ -386,15 +386,10 @@ const styles = StyleSheet.create({
   },
   bubble: {
     borderRadius: 20,
-    padding: 14,
+    padding: 12,
+    paddingHorizontal: 14,
     marginVertical: 1.5,
     marginHorizontal: 8,
-  },
-  bubbleMe: {
-    // Remove borderBottomRightRadius from here
-  },
-  bubbleOther: {
-    // Remove borderBottomLeftRadius from here
   },
   bubbleMeSingle: {
     borderRadius: 20,
@@ -442,7 +437,7 @@ const styles = StyleSheet.create({
     borderLeftWidth: 2,
     borderRadius: 24,
     padding: 12,
-    marginBottom: 8,
+    marginBottom: 4,
   },
   replyContainerMe: {
     borderColor: "rgba(255, 255, 255, 0.9)",
@@ -489,7 +484,7 @@ const styles = StyleSheet.create({
   timestamp: {
     fontFamily: "Outfit_400Regular",
     fontSize: 10.8,
-    marginTop: 8,
+    marginTop: 5,
   },
   timestampMe: {
     color: "rgba(255, 255, 255, 0.7)",

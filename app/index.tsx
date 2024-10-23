@@ -5,11 +5,12 @@ import { api } from "@/convex/_generated/api";
 import { useAppState } from "@/hooks/useAppState";
 import usePushNotifications from "@/hooks/usePushNotifications";
 import { useTheme } from "@/hooks/useTheme";
+import { FlashList } from "@shopify/flash-list";
 import { usePaginatedQuery, useQuery } from "convex/react";
 import { LinearGradient } from "expo-linear-gradient";
 import { Stack } from "expo-router";
 import React from "react";
-import { ActivityIndicator, FlatList, StyleSheet, View } from "react-native";
+import { ActivityIndicator, StyleSheet, View } from "react-native";
 
 function Chat() {
   useAppState();
@@ -19,7 +20,7 @@ function Chat() {
     api.message.get,
     {},
     {
-      initialNumItems: 50,
+      initialNumItems: 20,
     }
   );
 
@@ -44,22 +45,47 @@ function Chat() {
 
   const { theme } = useTheme();
 
-  const renderMessage = ({ item, index }: { item: any; index: number }) => {
-    const isFirstInGroup =
-      index === results.length - 1 ||
-      results[index + 1].username !== item.username;
-    const isLastInGroup =
-      index === 0 || results[index - 1].username !== item.username;
+  const renderMessage = React.useCallback(
+    ({ item, index }: { item: any; index: number }) => {
+      const isFirstInGroup =
+        index === results.length - 1 ||
+        results[index + 1].username !== item.username;
+      const isLastInGroup =
+        index === 0 || results[index - 1].username !== item.username;
 
-    return (
-      <ChatBubble
-        message={item}
-        isMe={item.username === "Siam"}
-        isFirstInGroup={isFirstInGroup}
-        isLastInGroup={isLastInGroup}
-      />
-    );
-  };
+      return (
+        <ChatBubble
+          message={item}
+          isMe={item.username === "Siam"}
+          isFirstInGroup={isFirstInGroup}
+          isLastInGroup={isLastInGroup}
+        />
+      );
+    },
+    [results]
+  );
+
+  const ListHeaderComponent = React.useCallback(
+    () => (
+      <View>
+        {!!sohana_typing?.text.length && (
+          <ChatBubble
+            message={results[0]}
+            isTyping={sohana_typing?.text.length > 0}
+            isMe={false}
+            isFirstInGroup={true}
+            isLastInGroup={true}
+          />
+        )}
+      </View>
+    ),
+    [sohana_typing?.text, results]
+  );
+
+  const ListFooterComponent = React.useCallback(
+    () => renderLoader(theme),
+    [theme, status]
+  );
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
@@ -86,29 +112,16 @@ function Chat() {
               style={styles.gradientOverlay}
             />
             <ChatHeader />
-            <FlatList
+            <FlashList
               data={results}
-              keyExtractor={(item) => item._id}
               renderItem={renderMessage}
-              showsVerticalScrollIndicator={false}
+              estimatedItemSize={100}
               inverted
               keyboardShouldPersistTaps="handled"
               onEndReached={handleLoadMore}
               onEndReachedThreshold={0.5}
-              ListFooterComponent={() => renderLoader(theme)}
-              ListHeaderComponent={() => (
-                <View>
-                  {!!sohana_typing?.text.length && (
-                    <ChatBubble
-                      message={results[0]}
-                      isTyping={sohana_typing?.text.length > 0}
-                      isMe={false}
-                      isFirstInGroup={true}
-                      isLastInGroup={true}
-                    />
-                  )}
-                </View>
-              )}
+              ListFooterComponent={ListFooterComponent}
+              ListHeaderComponent={ListHeaderComponent}
             />
           </>
         )}
